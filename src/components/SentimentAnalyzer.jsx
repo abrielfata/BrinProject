@@ -206,7 +206,7 @@ export default function SentimentAnalyzer() {
     }
     
     return Object.entries(sentimentCounts)
-      .filter(([_, count]) => count > 0)
+      .filter(([, count]) => count > 0)
       .map(([sentiment, count]) => ({
         name: sentiment.charAt(0).toUpperCase() + sentiment.slice(1),
         value: ((count / total) * 100).toFixed(1),
