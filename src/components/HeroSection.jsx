@@ -1,7 +1,7 @@
 import React from 'react';
 import { ChevronDown, Car, Brain, Target, Award, Zap } from 'lucide-react';
 
-export default function HeroSection({ onNavigateToAnalyzer }) {
+function HeroSection({ onNavigateToAnalyzer }) {
   const scrollToNext = () => {
     const nextSection = document.getElementById('research');
     if (nextSection) {
@@ -26,6 +26,11 @@ export default function HeroSection({ onNavigateToAnalyzer }) {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="text-white">
+            {/* Research Badge */}
+            <div className="inline-flex items-center space-x-2 bg-yellow-500 text-blue-900 px-4 py-2 rounded-full text-sm font-semibold mb-6">
+              <Award className="w-4 h-4" />
+              <span>Penelitian Terdepan 2024</span>
+            </div>
 
             {/* Main Title */}
             <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
@@ -127,3 +132,5 @@ export default function HeroSection({ onNavigateToAnalyzer }) {
     </section>
   );
 }
+
+export default HeroSection;
