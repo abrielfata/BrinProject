@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Menu, X, Search, ChevronDown, Car, Brain, Target, ExternalLink } from 'lucide-react';
+import { Menu, X, Car, Brain, Target } from 'lucide-react';
 
-export default function BrinHeader({ onNavigate, activeSection }) {
+function BrinHeader({ onNavigate, activeSection }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navItems = [
@@ -23,7 +23,6 @@ export default function BrinHeader({ onNavigate, activeSection }) {
           {/* Logo BRIN */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              {/* Logo placeholder - dalam implementasi nyata gunakan logo BRIN asli */}
               <div className="w-12 h-12 bg-blue-900 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">B</span>
               </div>
@@ -94,3 +93,5 @@ export default function BrinHeader({ onNavigate, activeSection }) {
     </header>
   );
 }
+
+export default BrinHeader;
