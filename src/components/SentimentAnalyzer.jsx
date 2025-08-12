@@ -131,11 +131,11 @@ export default function SentimentAnalyzer() {
   const getSentimentColor = (sentiment) => {
     switch (sentiment) {
       case 'positive':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-green-50 text-green-700 border-green-200'
       case 'negative':
-        return 'bg-red-100 text-red-800 border-red-200'
+        return 'bg-red-50 text-red-700 border-red-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-50 text-gray-700 border-gray-200'
     }
   }
 
@@ -145,7 +145,7 @@ export default function SentimentAnalyzer() {
     const colors = {
       positive: '#22c55e',
       negative: '#ef4444',
-      neutral: '#eab308'
+      neutral: '#6b7280'
     }
     
     return Object.entries(probabilities).map(([sentiment, probability]) => ({
@@ -161,7 +161,7 @@ export default function SentimentAnalyzer() {
     
     return (
       <div className="mt-4">
-        <h4 className="text-sm font-medium mb-2">Probability Distribution</h4>
+        <h4 className="text-sm font-medium mb-2 text-gray-900">Probability Distribution</h4>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
             <Pie
@@ -202,7 +202,7 @@ export default function SentimentAnalyzer() {
     const colors = {
       positive: '#22c55e',
       negative: '#ef4444',
-      neutral: '#eab308'
+      neutral: '#6b7280'
     }
     
     return Object.entries(sentimentCounts)
@@ -220,7 +220,7 @@ export default function SentimentAnalyzer() {
     
     return (
       <div className="mt-4">
-        <h4 className="text-sm font-medium mb-2">Batch Sentiment Distribution</h4>
+        <h4 className="text-sm font-medium mb-2 text-gray-900">Batch Sentiment Distribution</h4>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>
             <Pie
@@ -249,12 +249,12 @@ export default function SentimentAnalyzer() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+    <div className="bg-white p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
-            <Brain className="h-8 w-8 text-indigo-600" />
+            <Brain className="h-8 w-8 text-red-600" />
             <h1 className="text-3xl font-bold text-gray-900">Sentiment Analyzer</h1>
           </div>
           <p className="text-gray-600">Analyze the emotional tone of your text using AI</p>
@@ -262,7 +262,7 @@ export default function SentimentAnalyzer() {
 
         {/* Tab Navigation */}
         <div className="flex justify-center">
-          <div className="bg-white rounded-lg p-1 shadow-sm border">
+          <div className="bg-gray-50 rounded-lg p-1 shadow-sm border border-gray-200">
             <Button
               variant={activeTab === 'single' ? 'default' : 'ghost'}
               onClick={() => setActiveTab('single')}
@@ -282,9 +282,9 @@ export default function SentimentAnalyzer() {
 
         {/* Single Text Analysis */}
         {activeTab === 'single' && (
-          <Card className="shadow-lg">
+          <Card className="shadow-sm border border-gray-200">
             <CardHeader>
-              <CardTitle>Analyze Single Text</CardTitle>
+              <CardTitle className="text-gray-900">Analyze Single Text</CardTitle>
               <CardDescription>Enter your text below to analyze its sentiment</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -292,12 +292,12 @@ export default function SentimentAnalyzer() {
                 placeholder="Enter your text here... (e.g., 'I love this product!' or 'This is disappointing')"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="min-h-[120px] resize-none"
+                className="min-h-[120px] resize-none border-gray-200 focus:border-red-500 focus:ring-red-500"
                 maxLength={1000}
               />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">{text.length}/1000 characters</span>
-                <Button onClick={analyzeSentiment} disabled={loading}>
+                <Button onClick={analyzeSentiment} disabled={loading} className="bg-red-600 hover:bg-red-700">
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -311,9 +311,9 @@ export default function SentimentAnalyzer() {
 
               {/* Single Result */}
               {result && (
-                <Card className="mt-6">
+                <Card className="mt-6 border border-gray-200">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-gray-900">
                       {getSentimentIcon(result.predicted_class)}
                       Analysis Result
                     </CardTitle>
@@ -327,12 +327,12 @@ export default function SentimentAnalyzer() {
                     </div>
 
                     <div className="space-y-2">
-                      <h4 className="font-medium">Probability Breakdown:</h4>
+                      <h4 className="font-medium text-gray-900">Probability Breakdown:</h4>
                       {Object.entries(result.all_probabilities).map(([sentiment, prob]) => (
                         <div key={sentiment} className="space-y-1">
                           <div className="flex justify-between text-sm">
-                            <span className="capitalize">{sentiment}</span>
-                            <span>{(prob * 100).toFixed(1)}%</span>
+                            <span className="capitalize text-gray-700">{sentiment}</span>
+                            <span className="text-gray-600">{(prob * 100).toFixed(1)}%</span>
                           </div>
                           <Progress value={prob * 100} className="h-2" />
                         </div>
@@ -349,9 +349,9 @@ export default function SentimentAnalyzer() {
 
         {/* Batch Analysis */}
         {activeTab === 'batch' && (
-          <Card className="shadow-lg">
+          <Card className="shadow-sm border border-gray-200">
             <CardHeader>
-              <CardTitle>Batch Analysis</CardTitle>
+              <CardTitle className="text-gray-900">Batch Analysis</CardTitle>
               <CardDescription>Enter multiple texts (one per line) to analyze them all at once</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -363,13 +363,13 @@ It's okay, nothing special
 Amazing customer service`}
                 value={batchTexts}
                 onChange={(e) => setBatchTexts(e.target.value)}
-                className="min-h-[150px] resize-none"
+                className="min-h-[150px] resize-none border-gray-200 focus:border-red-500 focus:ring-red-500"
               />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">
                   {batchTexts.split('\n').filter((t) => t.trim()).length} texts to analyze
                 </span>
-                <Button onClick={analyzeBatch} disabled={loading}>
+                <Button onClick={analyzeBatch} disabled={loading} className="bg-red-600 hover:bg-red-700">
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -384,14 +384,14 @@ Amazing customer service`}
               {/* Batch Results */}
               {batchResults.length > 0 && (
                 <div className="mt-6 space-y-3">
-                  <h3 className="font-semibold">Batch Results ({batchResults.length} texts)</h3>
+                  <h3 className="font-semibold text-gray-900">Batch Results ({batchResults.length} texts)</h3>
                   
                   {/* Batch Pie Chart */}
                   {renderBatchPieChart(batchResults)}
                   
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {batchResults.map((result, index) => (
-                      <Card key={index} className="p-3">
+                      <Card key={index} className="p-3 border border-gray-200">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-gray-700 truncate" title={result.text}>
