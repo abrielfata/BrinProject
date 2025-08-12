@@ -22,12 +22,6 @@ function HeroSection({ onNavigateToAnalyzer }) {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div className="text-gray-900">
-            {/* Research Badge */}
-            <div className="inline-flex items-center space-x-2 bg-red-50 text-red-700 px-4 py-2 rounded-full text-sm font-semibold mb-6 border border-red-200">
-              <Award className="w-4 h-4" />
-              <span>Penelitian Terdepan 2024</span>
-            </div>
-
             {/* Main Title */}
             <h1 className="text-4xl md:text-6xl font-bold leading-tight mb-6">
               <span className="text-red-600">Deep Learning</span><br />

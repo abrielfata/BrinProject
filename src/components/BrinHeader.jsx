@@ -23,8 +23,12 @@ function BrinHeader({ onNavigate, activeSection }) {
           {/* Logo BRIN */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
-              <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-lg flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">B</span>
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img 
+                  src="/src/assets/brin-logo.png" 
+                  alt="BRIN Logo" 
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-red-800">BRIN</h1>
