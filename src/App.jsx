@@ -36,7 +36,7 @@ function App() {
         <section id="research" className="bg-gray-50 py-20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
-              <div className="inline-flex items-center space-x-2 bg-blue-50 text-blue-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-blue-200">
+              <div className="inline-flex items-center space-x-2 bg-white text-gray-700 px-6 py-3 rounded-full text-sm font-semibold mb-6 border border-red-400">
                 <BookOpen className="w-5 h-5" />
                 <span>Penelitian Inovatif BRIN</span>
               </div>
@@ -52,12 +52,12 @@ function App() {
               <div className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-200">
                 <div className="text-center mb-8">
                   <div className="flex items-center justify-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-16 h-16 bg-gradient-to-br  from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
                       <BookOpen className="w-8 h-8 text-white" />
                     </div>
                     <div>
                       <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Abstrak Penelitian</h3>
-                      <p className="text-blue-600 font-medium">Latar Belakang dan Tujuan Studi</p>
+                      <p className="text-red-600 font-medium">Latar Belakang dan Tujuan Studi</p>
                     </div>
                   </div>
                 </div>
@@ -101,12 +101,12 @@ function App() {
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                   <div>
                     <div className="flex items-center space-x-4 mb-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <div className="w-16 h-16 bg-gradient-to-br  from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
                         <Database className="w-8 h-8 text-white" />
                       </div>
                       <div>
                         <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Pengumpulan Data</h3>
-                        <p className="text-green-600 font-medium">Multi-Platform Data Collection</p>
+                        <p className="text-red-600 font-medium">Multi-Platform Data Collection</p>
                       </div>
                     </div>
                     
@@ -127,16 +127,16 @@ function App() {
                         Tesla Autopilot, Waymo, dan FSD, menghasilkan <strong>13,000 komentar</strong>.
                       </p>
                       
-                      <div className="bg-green-50 rounded-xl p-6 border border-green-200">
+                      <div className="bg-white rounded-xl p-6 shadow-xl border border-red-200">
                         <h4 className="font-semibold text-gray-900 mb-3">Total Dataset</h4>
-                        <div className="text-3xl font-bold text-green-600">16,994</div>
+                        <div className="text-3xl font-bold text-gray-600">16,994</div>
                         <div className="text-sm text-gray-600">Komentar dari 2 Platform</div>
                       </div>
                     </div>
                   </div>
                   
                   <div className="space-y-6">
-                    <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <div className="bg-gray-50 rounded-xl p-6 shadow-xl border border-gray-200">
                       <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
                         <Network className="w-5 h-5 mr-2" />
                         Platform Distribution
@@ -182,15 +182,15 @@ function App() {
                     </div>
 
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
+                      <div className="bg-white rounded-xl p-4 text-center shadow-xl border border-red-200">
                         <div className="text-sm font-medium text-gray-900 mb-1">Keywords</div>
                         <div className="text-xs text-gray-600">Targeted Search</div>
                       </div>
-                      <div className="bg-purple-50 rounded-xl p-4 text-center border border-purple-200">
+                      <div className="bg-white rounded-xl p-4 text-center shadow-xl border border-red-200">
                         <div className="text-sm font-medium text-gray-900 mb-1">API Based</div>
                         <div className="text-xs text-gray-600">PRAW & YouTube</div>
                       </div>
-                      <div className="bg-indigo-50 rounded-xl p-4 text-center border border-indigo-200">
+                      <div className="bg-white rounded-xl p-4 text-center shadow-xl border border-red-200">
                         <div className="text-sm font-medium text-gray-900 mb-1">Multi-Source</div>
                         <div className="text-xs text-gray-600">Diverse Audience</div>
                       </div>
@@ -202,12 +202,12 @@ function App() {
               <div className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-200">
                 <div className="text-center mb-12">
                   <div className="flex items-center justify-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-16 h-16 bg-gradient-to-br  from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
                       <Brain className="w-8 h-8 text-white" />
                     </div>
                     <div>
                       <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Metodologi & Preprocessing</h3>
-                      <p className="text-purple-600 font-medium">Hybrid Labeling & Deep Learning Approach</p>
+                      <p className="text-red-600 font-medium">Hybrid Labeling & Deep Learning Approach</p>
                     </div>
                   </div>
                 </div>
@@ -216,18 +216,18 @@ function App() {
                   <div className="space-y-6">
                     <div className="prose text-gray-700 space-y-4">
                       <h4 className="font-semibold text-gray-900 mb-3">Preprocessing Pipeline</h4>
-                      <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                      <div className="bg-white rounded-xl p-6 border border-red-400">
                         <div className="space-y-3">
                           <div className="flex items-center">
-                            <ChevronRight className="w-4 h-4 mr-2 text-purple-600" />
+                            <ChevronRight className="w-4 h-4 mr-2 text-gray-600" />
                             <span className="font-medium">Text Cleaning</span>
                           </div>
                           <div className="flex items-center">
-                            <ChevronRight className="w-4 h-4 mr-2 text-purple-600" />
+                            <ChevronRight className="w-4 h-4 mr-2 text-gray-600" />
                             <span className="font-medium">Tokenization</span>
                           </div>
                           <div className="flex items-center">
-                            <ChevronRight className="w-4 h-4 mr-2 text-purple-600" />
+                            <ChevronRight className="w-4 h-4 mr-2 text-gray-600" />
                             <span className="font-medium">Normalization</span>
                           </div>
                         </div>
@@ -256,7 +256,7 @@ function App() {
                             <div className="text-sm text-gray-600">Basic Recurrent Network</div>
                           </div>
                           <div className="w-16 h-2 bg-gray-200 rounded-full">
-                            <div className="w-2/3 h-2 bg-blue-500 rounded-full"></div>
+                            <div className="w-2/3 h-2 bg-yellow-300 rounded-full"></div>
                           </div>
                         </div>
                         
@@ -266,7 +266,7 @@ function App() {
                             <div className="text-sm text-gray-600">Long Short-Term Memory</div>
                           </div>
                           <div className="w-16 h-2 bg-gray-200 rounded-full">
-                            <div className="w-4/5 h-2 bg-green-500 rounded-full"></div>
+                            <div className="w-4/5 h-2 bg-orange-600 rounded-full"></div>
                           </div>
                         </div>
                         
@@ -276,39 +276,18 @@ function App() {
                             <div className="text-sm text-gray-600">Gated Recurrent Unit</div>
                           </div>
                           <div className="w-16 h-2 bg-gray-200 rounded-full">
-                            <div className="w-3/4 h-2 bg-purple-500 rounded-full"></div>
+                            <div className="w-3/4 h-2 bg-orange-400 rounded-full"></div>
                           </div>
                         </div>
                         
-                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 ring-2 ring-green-200">
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg shadow-xl">
                           <div>
-                            <div className="font-medium text-green-900">Bi-LSTM ⭐</div>
-                            <div className="text-sm text-green-600">Bidirectional LSTM</div>
+                            <div className="font-medium text-red-900">Bi-LSTM </div>
+                            <div className="text-sm ">Bidirectional LSTM</div>
                           </div>
                           <div className="w-16 h-2 bg-gray-200 rounded-full">
-                            <div className="w-full h-2 bg-green-600 rounded-full"></div>
+                            <div className="w-full h-2 bg-red-600 rounded-full"></div>
                           </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">
-                      <h4 className="font-semibold mb-4 flex items-center">
-                        <BarChart3 className="w-5 h-5 mr-2" />
-                        Baseline Comparisons
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center">
-                          <ChevronRight className="w-4 h-4 mr-2" />
-                          <span>Logistic Regression</span>
-                        </div>
-                        <div className="flex items-center">
-                          <ChevronRight className="w-4 h-4 mr-2" />
-                          <span>Support Vector Machines</span>
-                        </div>
-                        <div className="flex items-center">
-                          <ChevronRight className="w-4 h-4 mr-2" />
-                          <span>Random Forest</span>
                         </div>
                       </div>
                     </div>
@@ -317,14 +296,112 @@ function App() {
               </div>
 
               <div className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-200">
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center space-x-4 mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <BarChart3 className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Analisis Data Awal</h3>
+                      <p className="text-red-600 font-medium">Dataset dan Distribusi Sentimen</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-12 items-start">
+                  <div className="space-y-6">
+                    <div className="text-gray-700 space-y-4">
+                      <p className="text-lg leading-relaxed">
+                        Dataset berawal dari <strong>16,994 komentar</strong> dan diambil sebanyak <strong>7,206 komentar</strong> yang dikumpulkan dari platform 
+                        Reddit dan YouTube sebagai data training. Sebagian besar komentar berasal dari Reddit sebagai sumber utama 
+                        ekspresi opini publik.
+                      </p>
+                      
+                      <p className="leading-relaxed">
+                        Analisis menunjukkan bahwa sebagian besar komentar mengandung kurang dari 100 kata, 
+                        mengkonfirmasi bahwa pengaturan maxlen = 100 selama preprocessing sudah cukup untuk 
+                        menangkap informasi esensial.
+                      </p>
+
+                      <div className="bg-white rounded-xl p-6 border border-red-200">
+                        <h4 className="font-semibold text-gray-900 mb-3">Robust Sentiment Labeling</h4>
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          Untuk mencapai pelabelan sentimen yang lebih akurat, penelitian ini menggabungkan 
+                          multiple approaches: <strong>VADER, TextBlob, keyword matching</strong>, dan 
+                          analisis emosi kontekstual seperti emoji dan tanda seru.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="bg-gray-50 rounded-xl p-6 border shadow-xl border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                        <BarChart3 className="w-5 h-5 mr-2" />
+                        Distribusi Sentimen
+                      </h4>
+                      
+                      <div className="space-y-4">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Positif</span>
+                            <span className="text-sm text-gray-600">4,076 (56.56%)</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div className="bg-green-500 h-3 rounded-full" style={{ width: '56.56%' }}></div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Negatif</span>
+                            <span className="text-sm text-gray-600">1,973 (27.38%)</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div className="bg-red-500 h-3 rounded-full" style={{ width: '27.38%' }}></div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium text-gray-700">Netral</span>
+                            <span className="text-sm text-gray-600">1,157 (16.06%)</span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div className="bg-gray-500 h-3 rounded-full" style={{ width: '16.06%' }}></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-6 p-4 bg-white rounded-lg border border-gray-100">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-gray-900">7,206</div>
+                          <div className="text-sm text-gray-600">Total Komentar</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
+                      <h4 className="font-semibold text-blue-900 mb-2 text-sm">Class Imbalance Impact</h4>
+                      <p className="text-xs text-blue-800">
+                        Ketidakseimbangan kelas ini menginformasikan pemilihan metrik evaluasi yang 
+                        adil seperti weighted F1-Score dan penerapan class weighting selama 
+                        training model BiLSTM.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-200">
                 <div className="text-center mb-12">
                   <div className="flex items-center justify-center space-x-4 mb-6">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
                       <Award className="w-8 h-8 text-white" />
                     </div>
                     <div>
                       <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Hasil & Kinerja Model</h3>
-                      <p className="text-green-600 font-medium">Superior Performance with Bi-LSTM</p>
+                      <p className="text-red-500 font-medium">Superior Performance with Bi-LSTM</p>
                     </div>
                   </div>
                 </div>
@@ -339,34 +416,34 @@ function App() {
                   </div>
 
                   <div className="grid lg:grid-cols-3 gap-8">
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                    <div className="bg-gradient-to-brfrom-white to-white rounded-xl p-6 border border-red-500">
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
                           <TrendingUp className="w-8 h-8 text-white" />
                         </div>
-                        <div className="text-3xl font-bold text-green-600 mb-2">94.2%</div>
+                        <div className="text-3xl font-bold text-gray-900 mb-2">94.2%</div>
                         <div className="text-sm font-medium text-gray-900 mb-1">Akurasi Tertinggi</div>
                         <div className="text-xs text-gray-600">Bi-LSTM Model</div>
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                    <div className="bg-gradient-to-br from-white to-white rounded-xl p-6 border border-red-500">
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Target className="w-8 h-8 text-white" />
                         </div>
-                        <div className="text-3xl font-bold text-blue-600 mb-2">92.1%</div>
+                        <div className="text-3xl font-bold text-gray-900 mb-2">92.1%</div>
                         <div className="text-sm font-medium text-gray-900 mb-1">F1-Score</div>
                         <div className="text-xs text-gray-600">Balanced Performance</div>
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+                    <div className="bg-gradient-to-br from-white to-white rounded-xl p-6 border border-red-500">
                       <div className="text-center">
-                        <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <div className="w-16 h-16 bg-red-400 rounded-full flex items-center justify-center mx-auto mb-4">
                           <Brain className="w-8 h-8 text-white" />
                         </div>
-                        <div className="text-3xl font-bold text-purple-600 mb-2">100D</div>
+                        <div className="text-3xl font-bold  text-gray-900 mb-2">100D</div>
                         <div className="text-sm font-medium text-gray-900 mb-1">GloVe Embeddings</div>
                         <div className="text-xs text-gray-600">Optimal Configuration</div>
                       </div>
@@ -377,17 +454,17 @@ function App() {
                     <h4 className="font-semibold text-gray-900 mb-4 text-center">Aplikasi Potensial</h4>
                     <div className="grid md:grid-cols-3 gap-4 text-center">
                       <div className="flex flex-col items-center">
-                        <BarChart3 className="w-8 h-8 text-blue-600 mb-2" />
+                        <BarChart3 className="w-8 h-8 text-gray-600 mb-2" />
                         <div className="font-medium text-gray-900">Market Analysis</div>
                         <div className="text-sm text-gray-600">Analisis sentimen pasar</div>
                       </div>
                       <div className="flex flex-col items-center">
-                        <Users className="w-8 h-8 text-green-600 mb-2" />
+                        <Users className="w-8 h-8 text-gray-600 mb-2" />
                         <div className="font-medium text-gray-900">Consumer Research</div>
                         <div className="text-sm text-gray-600">Riset perilaku konsumen</div>
                       </div>
                       <div className="flex flex-col items-center">
-                        <Target className="w-8 h-8 text-purple-600 mb-2" />
+                        <Target className="w-8 h-8 text-gray-600 mb-2" />
                         <div className="font-medium text-gray-900">Policy Development</div>
                         <div className="text-sm text-gray-600">Pengembangan kebijakan</div>
                       </div>
@@ -421,12 +498,95 @@ function App() {
           </div>
         </section>
 
-        <section id="about" className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Tentang Tim</h2>
-            <p className="text-gray-600">Section tentang akan dibuat di step selanjutnya</p>
+        <footer className="bg-gray-900 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid md:grid-cols-4 gap-8">
+              {/* BRIN Info */}
+              <div className="md:col-span-2">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
+                    <img 
+                      src="/src/assets/brin-logo.png" 
+                      alt="BRIN Logo" 
+                      className="w-12 h-12 object-contain"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextElementSibling.style.display = 'flex';
+                      }}
+                    />
+                  </div>
+                <div>
+                    <h3 className="text-xl font-bold">BRIN AI Research</h3>
+                    <p className="text-gray-400 text-sm">Sentiment Analysis for Autonomous Vehicles</p>
+                  </div>
+                </div>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Penelitian deep learning untuk menganalisis sentimen publik terhadap 
+                  teknologi kendaraan otonom Level 2, dikembangkan oleh Badan Riset dan Inovasi Nasional.
+                </p>
+              </div>
+
+              {/* Quick Links */}
+              <div>
+                <h4 className="font-semibold text-white mb-4">Quick Links</h4>
+                <ul className="space-y-2">
+                  <li>
+                    <button 
+                      onClick={() => handleNavigation('home')}
+                      className="text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Beranda
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => handleNavigation('research')}
+                      className="text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Penelitian
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => handleNavigation('analyzer')}
+                      className="text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Sentiment Analyzer
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-white mb-4">Kontak BRIN</h4>
+                <div className="space-y-2 text-sm text-gray-400">
+                  <p> Website: www.brin.go.id</p>
+                  <p className="text-xs text-gray-400 mt-4">
+                    Gedung BRIN, Jl. Sangkuriang, Dago, Kecamatan Coblong, Kota Bandung
+                    Jawa Barat, Indonesia.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+              <div className="text-sm text-gray-400">
+                © 2024 BRIN (Badan Riset dan Inovasi Nasional). All rights reserved.
+              </div>
+              <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                <span className="text-xs text-gray-500">Powered by</span>
+                <div className="flex items-center space-x-1 text-xs text-gray-400">
+                  <Brain className="w-3 h-3" />
+                  <span>Deep Learning</span>
+                </div>
+                <div className="flex items-center space-x-1 text-xs text-gray-400">
+                  <Target className="w-3 h-3" />
+                  <span>NLP</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
+        </footer>
       </main>
     </div>
   );
