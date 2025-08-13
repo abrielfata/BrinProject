@@ -420,13 +420,94 @@ function App() {
             </div>
           </div>
         </section>
+        {/* Footer */}
+        <footer className="bg-gray-900 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid md:grid-cols-4 gap-8">
+              {/* BRIN Info */}
+              <div className="md:col-span-2">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
+                    <Brain className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold">BRIN AI Research</h3>
+                    <p className="text-gray-400 text-sm">Sentiment Analysis for Autonomous Vehicles</p>
+                  </div>
+                </div>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Penelitian deep learning untuk menganalisis sentimen publik terhadap 
+                  teknologi kendaraan otonom Level 2, dikembangkan oleh Badan Riset dan Inovasi Nasional.
+                </p>
+                <div className="flex items-center space-x-2 text-sm text-gray-400">
+                  <Award className="w-4 h-4" />
+                  <span>Model Accuracy: 94.2%</span>
+                </div>
+              </div>
 
-        <section id="about" className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Tentang Tim</h2>
-            <p className="text-gray-600">Section tentang akan dibuat di step selanjutnya</p>
+              {/* Quick Links */}
+              <div>
+                <h4 className="font-semibold text-white mb-4">Quick Links</h4>
+                <ul className="space-y-2">
+                  <li>
+                    <button 
+                      onClick={() => handleNavigation('home')}
+                      className="text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Beranda
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => handleNavigation('research')}
+                      className="text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Penelitian
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => handleNavigation('analyzer')}
+                      className="text-gray-300 hover:text-white transition-colors text-sm"
+                    >
+                      Sentiment Analyzer
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Contact Info */}
+              <div>
+                <h4 className="font-semibold text-white mb-4">Kontak BRIN</h4>
+                <div className="space-y-2 text-sm text-gray-300">
+                  <p>Website: www.brin.go.id</p>
+                  <p>Email: humas@brin.go.id</p>
+                  <p className="text-xs text-gray-400 mt-4">
+                    Gedung BRIN, Jl. Sangkuriang, Dago, Kecamatan Coblong, Kota Bandung
+                    Jawa Barat, Indonesia.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+              <div className="text-sm text-gray-400">
+                © 2024 BRIN (Badan Riset dan Inovasi Nasional). All rights reserved.
+              </div>
+              <div className="flex items-center space-x-4 mt-4 md:mt-0">
+                <span className="text-xs text-gray-500">Powered by</span>
+                <div className="flex items-center space-x-1 text-xs text-gray-400">
+                  <Brain className="w-3 h-3" />
+                  <span>Deep Learning</span>
+                </div>
+                <div className="flex items-center space-x-1 text-xs text-gray-400">
+                  <Target className="w-3 h-3" />
+                  <span>NLP</span>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
+        </footer>
       </main>
     </div>
   );

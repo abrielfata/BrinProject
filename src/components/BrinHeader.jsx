@@ -20,7 +20,6 @@ function BrinHeader({ onNavigate, activeSection }) {
     <header className="bg-white shadow-lg border-b-4 border-red-600 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          {/* Logo BRIN */}
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
               <div className="w-12 h-12 flex items-center justify-center">
@@ -28,7 +27,14 @@ function BrinHeader({ onNavigate, activeSection }) {
                   src="/src/assets/brin-logo.png" 
                   alt="BRIN Logo" 
                   className="w-12 h-12 object-contain"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.nextElementSibling.style.display = 'flex';
+                  }}
                 />
+                <div className="w-12 h-12 bg-red-600 rounded-full items-center justify-center hidden">
+                  <Brain className="w-8 h-8 text-white" />
+                </div>
               </div>
               <div className="ml-3">
                 <h1 className="text-xl font-bold text-red-800">BRIN</h1>
