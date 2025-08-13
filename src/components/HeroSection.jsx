@@ -29,19 +29,13 @@ function HeroSection({ onNavigateToAnalyzer }) {
               <span className="text-red-600">Sentimen Publik</span>
             </h1>
 
-            {/* Subtitle */}
             <p className="text-xl md:text-2xl text-gray-600 mb-6">
               Teknologi Kendaraan Otonom Level 2
             </p>
-
-            {/* Description */}
             <p className="text-lg text-gray-700 mb-8 max-w-2xl leading-relaxed">
-              Penelitian inovatif BRIN untuk memahami persepsi masyarakat Indonesia terhadap 
-              implementasi teknologi kendaraan otonom menggunakan artificial intelligence 
+              Penelitian inovatif BRIN untuk memahami persepsi terhadap implementasi teknologi kendaraan otonom menggunakan artificial intelligence 
               dan deep learning terdepan.
             </p>
-
-            {/* Key Features */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
               <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4 border border-gray-100">
                 <Brain className="w-6 h-6 text-red-600" />
@@ -66,7 +60,6 @@ function HeroSection({ onNavigateToAnalyzer }) {
               </div>
             </div>
 
-            {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
               <button 
                 onClick={onNavigateToAnalyzer}
@@ -84,10 +77,8 @@ function HeroSection({ onNavigateToAnalyzer }) {
             </div>
           </div>
 
-          {/* Visual Element with BRIN Logo */}
           <div className="lg:flex justify-center items-center hidden">
             <div className="relative">
-              {/* Main Circle */}
               <div className="w-80 h-80 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-xl border border-gray-200">
                 <div className="w-64 h-64 rounded-full bg-white flex items-center justify-center shadow-lg border border-gray-100">
                   <img 
@@ -95,17 +86,14 @@ function HeroSection({ onNavigateToAnalyzer }) {
                     alt="BRIN Logo" 
                     className="w-32 h-32 object-contain"
                     onError={(e) => {
-                      // Fallback jika logo tidak ditemukan
                       e.target.style.display = 'none';
                       e.target.nextElementSibling.style.display = 'block';
                     }}
                   />
-                  {/* Fallback Brain icon jika logo tidak tersedia */}
                   <Brain className="w-32 h-32 text-red-600 hidden" />
                 </div>
               </div>
               
-              {/* Floating Elements */}
               <div className="absolute -top-4 -left-4 w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg border border-gray-200 animate-pulse">
                 <Car className="w-8 h-8 text-gray-700" />
               </div>
@@ -119,7 +107,6 @@ function HeroSection({ onNavigateToAnalyzer }) {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
           <button 
             onClick={scrollToNext}
