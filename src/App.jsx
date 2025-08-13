@@ -41,62 +41,59 @@ function App() {
                 <span>Penelitian Inovatif BRIN</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                Latar Belakang Penelitian
+                Deep Learning untuk Klasifikasi Sentimen
               </h2>
               <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-                Menganalisis persepsi publik terhadap teknologi kendaraan otonom Level 2 menggunakan 
-                pendekatan deep learning untuk klasifikasi sentimen
+                Evaluasi model deep learning untuk mengklasifikasikan sentimen publik terhadap teknologi kendaraan otonom Level 2
               </p>
             </div>
 
             <div className="space-y-16">
               <div className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-200">
-                <div className="grid lg:grid-cols-5 gap-8 items-center">
-                  <div className="lg:col-span-3 space-y-6">
-                    <div className="flex items-center space-x-4 mb-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Car className="w-8 h-8 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Revolusi AI dalam Industri Otomotif</h3>
-                        <p className="text-red-600 font-medium">Teknologi Disruptif Era Modern</p>
-                      </div>
+                <div className="text-center mb-8">
+                  <div className="flex items-center justify-center space-x-4 mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <BookOpen className="w-8 h-8 text-white" />
                     </div>
-                    
-                    <div className="prose prose-lg text-gray-700 space-y-4">
-                      <p className="leading-relaxed">
-                        Perkembangan <strong>kecerdasan buatan</strong> telah mendorong inovasi disruptif di berbagai sektor, 
-                        tidak terkecuali industri otomotif. Salah satu manifestasi utamanya adalah <strong>Sistem Asistensi 
-                        Pengemudi Canggih (ADAS)</strong> yang dikategorikan sebagai otonomi Level 2 oleh Society of Automotive Engineers (SAE).
-                      </p>
-                      
-                      <p className="leading-relaxed">
-                        Sistem ini mengkombinasikan fungsi seperti <em>Adaptive Cruise Control</em> dan <em>Lane Keeping Assist</em>, 
-                        memungkinkan kendaraan untuk mengelola kecepatan dan kemudi secara simultan di bawah pengawasan pengemudi.
-                      </p>
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Abstrak Penelitian</h3>
+                      <p className="text-blue-600 font-medium">Latar Belakang dan Tujuan Studi</p>
                     </div>
                   </div>
+                </div>
+                
+                <div className="prose prose-lg text-gray-700 max-w-none leading-relaxed">
+                  <p className="mb-6">
+                    <strong>Teknologi kendaraan otonom Level 2</strong> semakin terintegrasi dalam kendaraan modern, 
+                    memicu beragam sentimen publik yang dapat mempengaruhi adopsi masa depan dan keputusan regulasi. 
+                    Studi ini berfokus pada pengembangan dan evaluasi model deep learning untuk mengklasifikasikan 
+                    sentimen publik terhadap teknologi ini ke dalam tiga kategori: <em>positif, negatif, dan netral</em>.
+                  </p>
                   
-                  <div className="lg:col-span-2">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-red-50 rounded-xl p-6 text-center border border-red-200">
-                        <div className="text-3xl font-bold text-red-600 mb-2">Level 2</div>
-                        <div className="text-sm text-gray-600">SAE Autonomy</div>
-                      </div>
-                      <div className="bg-blue-50 rounded-xl p-6 text-center border border-blue-200">
-                        <div className="text-3xl font-bold text-blue-600 mb-2">ADAS</div>
-                        <div className="text-sm text-gray-600">Technology</div>
-                      </div>
-                      <div className="bg-green-50 rounded-xl p-6 text-center border border-green-200">
-                        <div className="text-3xl font-bold text-green-600 mb-2">ACC</div>
-                        <div className="text-sm text-gray-600">Cruise Control</div>
-                      </div>
-                      <div className="bg-purple-50 rounded-xl p-6 text-center border border-purple-200">
-                        <div className="text-3xl font-bold text-purple-600 mb-2">LKA</div>
-                        <div className="text-sm text-gray-600">Lane Keeping</div>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="mb-6">
+                    Komentar publik dikumpulkan dari platform Reddit dan YouTube, kemudian menjalani pipeline 
+                    preprocessing komprehensif, termasuk pembersihan teks, tokenisasi, dan normalisasi. Label sentimen 
+                    ditugaskan secara robust menggunakan pendekatan hibrid yang menggabinkan <strong>VADER, TextBlob, 
+                    dan scoring berbasis kata kunci</strong> untuk mengurangi bias dalam klasifikasi sentimen netral dan 
+                    meningkatkan akurasi pelabelan secara keseluruhan.
+                  </p>
+                  
+                  <p className="mb-6">
+                    Berbagai arsitektur <strong>Recurrent Neural Network (RNN)</strong>, termasuk Simple RNN, 
+                    Long Short-Term Memory (LSTM), Gated Recurrent Unit (GRU), dan Bidirectional LSTM (Bi-LSTM), 
+                    dilatih dan dievaluasi menggunakan GloVe word embeddings. Model-model ini dibandingkan dengan 
+                    klasifikator machine learning konvensional seperti Logistic Regression, Support Vector Machines, 
+                    dan Random Forest.
+                  </p>
+                  
+                  <p>
+                    Hasil eksperimen menunjukkan bahwa arsitektur <strong>Bidirectional LSTM (Bi-LSTM)</strong>, 
+                    terutama ketika fine-tuned dengan 100-dimensional GloVe embeddings, mencapai metrik kinerja tertinggi. 
+                    Konfigurasi ini mengungguli baik baseline tradisional maupun varian RNN lainnya, menggarisbawahi 
+                    kemampuannya untuk menangkap dependensi sekuensial bidirectional untuk klasifikasi sentimen yang 
+                    lebih akurat dan bernuansa, yang berpotensi untuk aplikasi masa depan dalam analisis pasar, 
+                    penelitian perilaku konsumen, dan pengembangan kebijakan.
+                  </p>
                 </div>
               </div>
 
@@ -104,79 +101,215 @@ function App() {
                 <div className="grid lg:grid-cols-2 gap-12 items-center">
                   <div>
                     <div className="flex items-center space-x-4 mb-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                        <Users className="w-8 h-8 text-white" />
+                      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Database className="w-8 h-8 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Diskursus Publik Digital</h3>
-                        <p className="text-blue-600 font-medium">Sumber Data Berharga</p>
+                        <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Pengumpulan Data</h3>
+                        <p className="text-green-600 font-medium">Multi-Platform Data Collection</p>
                       </div>
                     </div>
                     
                     <div className="space-y-4 text-gray-700">
                       <p className="leading-relaxed">
-                        Seiring dengan meningkatnya prevalensi teknologi ini, <strong>diskursus publik</strong> di platform digital 
-                        seperti forum online dan media sosial menjadi semakin intens. Opini publik ini menjadi sumber data yang 
-                        sangat berharga dalam memahami persepsi masyarakat terhadap teknologi kendaraan otonom.
+                        Tahap pengumpulan data dilakukan melalui scraping dari dua platform dengan karakteristik 
+                        audiens yang berbeda untuk memastikan representasi yang komprehensif.
                       </p>
                       
                       <p className="leading-relaxed">
-                        <strong>Sentimen yang diekspresikan</strong> dapat merefleksikan tingkat kepercayaan, kekhawatiran terkait 
-                        keamanan, ekspektasi fitur, dan kepuasan pengguna secara umum.
+                        <strong>Reddit scraping</strong> dilakukan menggunakan library PRAW dari subreddit 
+                        r/SelfDrivingCars, r/cars, dan r/technology, menggunakan kata kunci <em>"autonomous vehicles"</em>, 
+                        <em>"lane assist"</em>, dan <em>"adaptive cruise control"</em>, menghasilkan <strong>3,994 komentar</strong>.
                       </p>
                       
                       <p className="leading-relaxed">
-                        Analisis terhadap sentimen ini memberikan <em>wawasan krusial</em> bagi produsen untuk inovasi produk, 
-                        bagi regulator untuk penyusunan kebijakan, dan bagi komunitas riset untuk memahami interaksi manusia-mesin.
+                        <strong>YouTube scraping</strong> memanfaatkan YouTube Data API v3 pada video terkait 
+                        Tesla Autopilot, Waymo, dan FSD, menghasilkan <strong>13,000 komentar</strong>.
                       </p>
+                      
+                      <div className="bg-green-50 rounded-xl p-6 border border-green-200">
+                        <h4 className="font-semibold text-gray-900 mb-3">Total Dataset</h4>
+                        <div className="text-3xl font-bold text-green-600">16,994</div>
+                        <div className="text-sm text-gray-600">Komentar dari 2 Platform</div>
+                      </div>
                     </div>
                   </div>
                   
                   <div className="space-y-6">
                     <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-4">Sumber Data Digital</h4>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-700">Forum Online</span>
-                          <div className="w-24 h-2 bg-gray-200 rounded-full">
-                            <div className="w-5/6 h-2 bg-blue-500 rounded-full"></div>
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                        <Network className="w-5 h-5 mr-2" />
+                        Platform Distribution
+                      </h4>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-100">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                              <span className="text-white font-bold text-sm">R</span>
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">Reddit</div>
+                              <div className="text-sm text-gray-600">3,994 comments</div>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-orange-600">23.5%</div>
+                            <div className="w-24 h-2 bg-gray-200 rounded-full">
+                              <div className="w-1/4 h-2 bg-orange-500 rounded-full"></div>
+                            </div>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-700">Media Sosial</span>
-                          <div className="w-24 h-2 bg-gray-200 rounded-full">
-                            <div className="w-4/5 h-2 bg-green-500 rounded-full"></div>
+                        
+                        <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-100">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 bg-red-500 rounded-lg flex items-center justify-center">
+                              <span className="text-white font-bold text-sm">Y</span>
+                            </div>
+                            <div>
+                              <div className="font-medium text-gray-900">YouTube</div>
+                              <div className="text-sm text-gray-600">13,000 comments</div>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-700">Review Platform</span>
-                          <div className="w-24 h-2 bg-gray-200 rounded-full">
-                            <div className="w-3/4 h-2 bg-purple-500 rounded-full"></div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-red-600">76.5%</div>
+                            <div className="w-24 h-2 bg-gray-200 rounded-full">
+                              <div className="w-3/4 h-2 bg-red-500 rounded-full"></div>
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-green-50 rounded-xl p-4 text-center border border-green-200">
-                        <TrendingUp className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                        <div className="text-sm font-medium text-gray-900">Kepercayaan</div>
-                        <div className="text-xs text-gray-600">Trust Level</div>
-                      </div>
-                      <div className="bg-red-50 rounded-xl p-4 text-center border border-red-200">
-                        <Target className="w-8 h-8 text-red-600 mx-auto mb-2" />
-                        <div className="text-sm font-medium text-gray-900">Kekhawatiran</div>
-                        <div className="text-xs text-gray-600">Safety Concerns</div>
-                      </div>
+
+                    <div className="grid grid-cols-3 gap-3">
                       <div className="bg-blue-50 rounded-xl p-4 text-center border border-blue-200">
-                        <Zap className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                        <div className="text-sm font-medium text-gray-900">Ekspektasi</div>
-                        <div className="text-xs text-gray-600">Feature Expectations</div>
+                        <div className="text-sm font-medium text-gray-900 mb-1">Keywords</div>
+                        <div className="text-xs text-gray-600">Targeted Search</div>
                       </div>
                       <div className="bg-purple-50 rounded-xl p-4 text-center border border-purple-200">
-                        <Award className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                        <div className="text-sm font-medium text-gray-900">Kepuasan</div>
-                        <div className="text-xs text-gray-600">User Satisfaction</div>
+                        <div className="text-sm font-medium text-gray-900 mb-1">API Based</div>
+                        <div className="text-xs text-gray-600">PRAW & YouTube</div>
+                      </div>
+                      <div className="bg-indigo-50 rounded-xl p-4 text-center border border-indigo-200">
+                        <div className="text-sm font-medium text-gray-900 mb-1">Multi-Source</div>
+                        <div className="text-xs text-gray-600">Diverse Audience</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl p-8 md:p-12 shadow-xl border border-gray-200">
+                <div className="text-center mb-12">
+                  <div className="flex items-center justify-center space-x-4 mb-6">
+                    <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <Brain className="w-8 h-8 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Metodologi & Preprocessing</h3>
+                      <p className="text-purple-600 font-medium">Hybrid Labeling & Deep Learning Approach</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid lg:grid-cols-2 gap-12">
+                  <div className="space-y-6">
+                    <div className="prose text-gray-700 space-y-4">
+                      <h4 className="font-semibold text-gray-900 mb-3">Preprocessing Pipeline</h4>
+                      <div className="bg-purple-50 rounded-xl p-6 border border-purple-200">
+                        <div className="space-y-3">
+                          <div className="flex items-center">
+                            <ChevronRight className="w-4 h-4 mr-2 text-purple-600" />
+                            <span className="font-medium">Text Cleaning</span>
+                          </div>
+                          <div className="flex items-center">
+                            <ChevronRight className="w-4 h-4 mr-2 text-purple-600" />
+                            <span className="font-medium">Tokenization</span>
+                          </div>
+                          <div className="flex items-center">
+                            <ChevronRight className="w-4 h-4 mr-2 text-purple-600" />
+                            <span className="font-medium">Normalization</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <h4 className="font-semibold text-gray-900 mb-3">Hybrid Sentiment Labeling</h4>
+                      <p className="leading-relaxed">
+                        Label sentimen ditugaskan menggunakan pendekatan hibrid yang menggabinkan 
+                        <strong> VADER, TextBlob, dan scoring berbasis kata kunci</strong> untuk mengurangi 
+                        bias dalam klasifikasi sentimen netral dan meningkatkan akurasi pelabelan.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
+                        <Cpu className="w-5 h-5 mr-2" />
+                        RNN Architectures Evaluated
+                      </h4>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                          <div>
+                            <div className="font-medium text-gray-900">Simple RNN</div>
+                            <div className="text-sm text-gray-600">Basic Recurrent Network</div>
+                          </div>
+                          <div className="w-16 h-2 bg-gray-200 rounded-full">
+                            <div className="w-2/3 h-2 bg-blue-500 rounded-full"></div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                          <div>
+                            <div className="font-medium text-gray-900">LSTM</div>
+                            <div className="text-sm text-gray-600">Long Short-Term Memory</div>
+                          </div>
+                          <div className="w-16 h-2 bg-gray-200 rounded-full">
+                            <div className="w-4/5 h-2 bg-green-500 rounded-full"></div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
+                          <div>
+                            <div className="font-medium text-gray-900">GRU</div>
+                            <div className="text-sm text-gray-600">Gated Recurrent Unit</div>
+                          </div>
+                          <div className="w-16 h-2 bg-gray-200 rounded-full">
+                            <div className="w-3/4 h-2 bg-purple-500 rounded-full"></div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100 ring-2 ring-green-200">
+                          <div>
+                            <div className="font-medium text-green-900">Bi-LSTM ⭐</div>
+                            <div className="text-sm text-green-600">Bidirectional LSTM</div>
+                          </div>
+                          <div className="w-16 h-2 bg-gray-200 rounded-full">
+                            <div className="w-full h-2 bg-green-600 rounded-full"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-6 text-white">
+                      <h4 className="font-semibold mb-4 flex items-center">
+                        <BarChart3 className="w-5 h-5 mr-2" />
+                        Baseline Comparisons
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center">
+                          <ChevronRight className="w-4 h-4 mr-2" />
+                          <span>Logistic Regression</span>
+                        </div>
+                        <div className="flex items-center">
+                          <ChevronRight className="w-4 h-4 mr-2" />
+                          <span>Support Vector Machines</span>
+                        </div>
+                        <div className="flex items-center">
+                          <ChevronRight className="w-4 h-4 mr-2" />
+                          <span>Random Forest</span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -187,120 +320,76 @@ function App() {
                 <div className="text-center mb-12">
                   <div className="flex items-center justify-center space-x-4 mb-6">
                     <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                      <Brain className="w-8 h-8 text-white" />
+                      <Award className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Natural Language Processing & Deep Learning</h3>
-                      <p className="text-green-600 font-medium">Solusi Analisis Teks Berskala Besar</p>
+                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900">Hasil & Kinerja Model</h3>
+                      <p className="text-green-600 font-medium">Superior Performance with Bi-LSTM</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid lg:grid-cols-2 gap-12">
-                  <div className="space-y-6">
-                    <div className="prose text-gray-700 space-y-4">
-                      <p className="leading-relaxed">
-                        Untuk menganalisis data tekstual berskala besar ini, teknik <strong>Natural Language Processing (NLP)</strong>, 
-                        khususnya analisis sentimen, menawarkan solusi yang efektif.
-                      </p>
-                      
-                      <p className="leading-relaxed">
-                        Dalam beberapa tahun terakhir, pendekatan berbasis <strong>deep learning (DL)</strong> telah menunjukkan 
-                        keunggulan signifikan dibandingkan metode machine learning (ML) konvensional untuk tugas-tugas NLP.
-                      </p>
-                      
-                      <p className="leading-relaxed">
-                        Arsitektur seperti <em>Recurrent Neural Network (RNN)</em> dan variannya, <em>Long Short-Term Memory (LSTM)</em>, 
-                        dirancang khusus untuk memodelkan data sekuensial seperti bahasa, memungkinkan mereka untuk menangkap 
-                        konteks dan dependensi yang kompleks antar kata.
-                      </p>
+                <div className="space-y-8">
+                  <div className="text-center">
+                    <p className="text-lg text-gray-700 leading-relaxed mb-8">
+                      Arsitektur <strong>Bidirectional LSTM (Bi-LSTM)</strong> dengan 100-dimensional GloVe embeddings 
+                      mencapai kinerja tertinggi, mengungguli baseline tradisional dan varian RNN lainnya dalam 
+                      menangkap dependensi sekuensial bidirectional untuk klasifikasi sentimen yang akurat.
+                    </p>
+                  </div>
+
+                  <div className="grid lg:grid-cols-3 gap-8">
+                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <TrendingUp className="w-8 h-8 text-white" />
+                        </div>
+                        <div className="text-3xl font-bold text-green-600 mb-2">94.2%</div>
+                        <div className="text-sm font-medium text-gray-900 mb-1">Akurasi Tertinggi</div>
+                        <div className="text-xs text-gray-600">Bi-LSTM Model</div>
+                      </div>
                     </div>
 
-                    <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white">
-                      <h4 className="font-semibold mb-3 flex items-center">
-                        <Cpu className="w-5 h-5 mr-2" />
-                        Keunggulan Deep Learning
-                      </h4>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center">
-                          <ChevronRight className="w-4 h-4 mr-2" />
-                          <span>Menangkap konteks kompleks antar kata</span>
+                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Target className="w-8 h-8 text-white" />
                         </div>
-                        <div className="flex items-center">
-                          <ChevronRight className="w-4 h-4 mr-2" />
-                          <span>Memodelkan dependensi sekuensial</span>
+                        <div className="text-3xl font-bold text-blue-600 mb-2">92.1%</div>
+                        <div className="text-sm font-medium text-gray-900 mb-1">F1-Score</div>
+                        <div className="text-xs text-gray-600">Balanced Performance</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Brain className="w-8 h-8 text-white" />
                         </div>
-                        <div className="flex items-center">
-                          <ChevronRight className="w-4 h-4 mr-2" />
-                          <span>Kinerja superior untuk tugas NLP</span>
-                        </div>
+                        <div className="text-3xl font-bold text-purple-600 mb-2">100D</div>
+                        <div className="text-sm font-medium text-gray-900 mb-1">GloVe Embeddings</div>
+                        <div className="text-xs text-gray-600">Optimal Configuration</div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
-                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                        <Network className="w-5 h-5 mr-2" />
-                        Arsitektur Model
-                      </h4>
-                      
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
-                          <div>
-                            <div className="font-medium text-gray-900">RNN</div>
-                            <div className="text-sm text-gray-600">Recurrent Neural Network</div>
-                          </div>
-                          <div className="w-16 h-2 bg-gray-200 rounded-full">
-                            <div className="w-3/4 h-2 bg-blue-500 rounded-full"></div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
-                          <div>
-                            <div className="font-medium text-gray-900">LSTM</div>
-                            <div className="text-sm text-gray-600">Long Short-Term Memory</div>
-                          </div>
-                          <div className="w-16 h-2 bg-gray-200 rounded-full">
-                            <div className="w-full h-2 bg-green-500 rounded-full"></div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-100">
-                          <div>
-                            <div className="font-medium text-gray-900">ML Konvensional</div>
-                            <div className="text-sm text-gray-600">Baseline Comparison</div>
-                          </div>
-                          <div className="w-16 h-2 bg-gray-200 rounded-full">
-                            <div className="w-2/3 h-2 bg-gray-400 rounded-full"></div>
-                          </div>
-                        </div>
+                  <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+                    <h4 className="font-semibold text-gray-900 mb-4 text-center">Aplikasi Potensial</h4>
+                    <div className="grid md:grid-cols-3 gap-4 text-center">
+                      <div className="flex flex-col items-center">
+                        <BarChart3 className="w-8 h-8 text-blue-600 mb-2" />
+                        <div className="font-medium text-gray-900">Market Analysis</div>
+                        <div className="text-sm text-gray-600">Analisis sentimen pasar</div>
                       </div>
-                    </div>
-
-                    <div className="bg-blue-50 rounded-xl p-6 border border-blue-200">
-                      <h4 className="font-semibold text-gray-900 mb-4 flex items-center">
-                        <BarChart3 className="w-5 h-5 mr-2" />
-                        Target Kinerja
-                      </h4>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-blue-600">94.2%</div>
-                          <div className="text-sm text-gray-600">Akurasi Model</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-green-600">92.1%</div>
-                          <div className="text-sm text-gray-600">F1-Score</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-purple-600">0.89</div>
-                          <div className="text-sm text-gray-600">Precision</div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-2xl font-bold text-red-600">0.95</div>
-                          <div className="text-sm text-gray-600">Recall</div>
-                        </div>
+                      <div className="flex flex-col items-center">
+                        <Users className="w-8 h-8 text-green-600 mb-2" />
+                        <div className="font-medium text-gray-900">Consumer Research</div>
+                        <div className="text-sm text-gray-600">Riset perilaku konsumen</div>
+                      </div>
+                      <div className="flex flex-col items-center">
+                        <Target className="w-8 h-8 text-purple-600 mb-2" />
+                        <div className="font-medium text-gray-900">Policy Development</div>
+                        <div className="text-sm text-gray-600">Pengembangan kebijakan</div>
                       </div>
                     </div>
                   </div>
