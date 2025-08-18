@@ -1,15 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from './ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card'
 import { Textarea } from './ui/Textarea'
 import { Badge } from './ui/Badge'
 import { Progress } from './ui/Progress'
-import { Loader2, Brain, TrendingUp, TrendingDown, Minus, AlertCircle } from 'lucide-react'
+import { Loader2, Brain, TrendingUp, TrendingDown, Minus, Database, BarChart3, Trash2 } from 'lucide-react'
 import { useToast } from '../hooks/useToast'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
-
-// API Configuration
-const API_BASE_URL = 'https://sentiment-api1.onrender.com';
 
 export default function SentimentAnalyzer() {
   const [text, setText] = useState('')
@@ -18,54 +15,50 @@ export default function SentimentAnalyzer() {
   const [batchResults, setBatchResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('single')
-  const [apiStatus, setApiStatus] = useState('unknown')
+  const [databaseStats, setDatabaseStats] = useState(null)
+  const [recentEntries, setRecentEntries] = useState([])
   const { toast } = useToast()
 
-  // Check API health status
-  const checkApiHealth = async () => {
+  // Load database statistics when component mounts
+  useEffect(() => {
+    loadDatabaseStats()
+  }, [])
+
+  const loadDatabaseStats = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
-      
+      const response = await fetch('/api/sentiment-stats')
       if (response.ok) {
-        const data = await response.json();
-        setApiStatus(data.model_loaded && data.tokenizer_loaded ? 'ready' : 'loading');
-        return true;
-      } else {
-        setApiStatus('error');
-        return false;
+        const data = await response.json()
+        setDatabaseStats(data)
+        setRecentEntries(data.recent_entries || [])
       }
     } catch (error) {
-      console.error('API health check failed:', error);
-      setApiStatus('error');
-      return false;
+      console.error('Error loading database stats:', error)
     }
-  };
+  }
 
-  // Save to local backend for data persistence
-  const saveToLocalBackend = async (analysisData) => {
+  const saveToDatabase = async (sentimentData) => {
     try {
       const response = await fetch('/api/save-sentiment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(analysisData),
-      });
-      
+        body: JSON.stringify(sentimentData),
+      })
+
       if (response.ok) {
-        console.log('✅ Data saved to local database');
-      } else {
-        console.warn('⚠️ Failed to save to local database');
+        const saveResult = await response.json()
+        console.log('✅ Data saved to database:', saveResult.data.id)
+        // Reload stats after saving
+        loadDatabaseStats()
+        return true
       }
     } catch (error) {
-      console.warn('⚠️ Local backend not available:', error.message);
+      console.error('Error saving to database:', error)
     }
-  };
+    return false
+  }
 
   const analyzeSentiment = async () => {
     if (!text.trim()) {
@@ -78,20 +71,12 @@ export default function SentimentAnalyzer() {
     }
 
     setLoading(true)
-    
     try {
-      // Check API health first
-      const isHealthy = await checkApiHealth();
-      if (!isHealthy) {
-        throw new Error('API is currently unavailable. Please try again later.');
-      }
-
       // Call external sentiment API
-      const response = await fetch(`${API_BASE_URL}/predict`, {
+      const response = await fetch('/sentiment-api/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify({
           text: text.trim(),
@@ -99,30 +84,19 @@ export default function SentimentAnalyzer() {
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
+        const errorData = await response.json()
+        throw new Error(errorData.error || `HTTP ${response.status}`)
       }
 
       const data = await response.json()
-      
-      // Validate response format
-      if (!data.predicted_class || !data.confidence || !data.all_probabilities) {
-        throw new Error('Invalid response format from API');
-      }
-      
       setResult(data)
       
-      // Save to local backend for persistence
-      await saveToLocalBackend({
-        text: data.text,
-        predicted_class: data.predicted_class,
-        confidence: data.confidence,
-        all_probabilities: data.all_probabilities
-      });
+      // Save to local database
+      const saved = await saveToDatabase(data)
       
       toast({
         title: 'Analysis Complete',
-        description: `Sentiment: ${data.predicted_class} (${(data.confidence * 100).toFixed(1)}% confidence)`,
+        description: `Sentiment: ${data.predicted_class} (${(data.confidence * 100).toFixed(1)}% confidence)${saved ? ' - Saved to database' : ''}`,
       })
     } catch (error) {
       console.error('Error:', error)
@@ -151,69 +125,39 @@ export default function SentimentAnalyzer() {
       return
     }
 
-    if (texts.length > 50) {
-      toast({
-        title: 'Error',
-        description: 'Maximum 50 texts allowed per batch',
-        variant: 'destructive',
-      })
-      return
-    }
-
     setLoading(true)
-    
     try {
-      // Check API health first
-      const isHealthy = await checkApiHealth();
-      if (!isHealthy) {
-        throw new Error('API is currently unavailable. Please try again later.');
-      }
-
-      // Call external batch prediction API
-      const response = await fetch(`${API_BASE_URL}/batch_predict`, {
+      // Call external batch API
+      const response = await fetch('/sentiment-api/batch_predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify({
-          texts: texts,
+          texts,
         }),
       })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `API Error: ${response.status} ${response.statusText}`);
+        const errorData = await response.json()
+        throw new Error(errorData.error || `HTTP ${response.status}`)
       }
 
       const data = await response.json()
-      
-      // Validate response format
-      if (!data.results || !Array.isArray(data.results)) {
-        throw new Error('Invalid batch response format from API');
-      }
-      
       setBatchResults(data.results)
       
-      // Save successful results to local backend
-      const successfulResults = data.results.filter(r => r.status === 'success');
-      for (const result of successfulResults) {
-        await saveToLocalBackend({
-          text: result.text,
-          predicted_class: result.predicted_class,
-          confidence: result.confidence,
-          all_probabilities: result.all_probabilities || {
-            [result.predicted_class]: result.confidence,
-            positive: result.predicted_class === 'positive' ? result.confidence : (1 - result.confidence) / 2,
-            negative: result.predicted_class === 'negative' ? result.confidence : (1 - result.confidence) / 2,
-            neutral: result.predicted_class === 'neutral' ? result.confidence : (1 - result.confidence) / 2
-          }
-        });
+      // Save each result to database
+      let savedCount = 0
+      for (const result of data.results) {
+        if (result.status === 'success') {
+          const saved = await saveToDatabase(result)
+          if (saved) savedCount++
+        }
       }
-      
+
       toast({
         title: 'Batch Analysis Complete',
-        description: `Analyzed ${data.total_processed || successfulResults.length} texts successfully`,
+        description: `Analyzed ${data.total_processed} texts, saved ${savedCount} to database`,
       })
     } catch (error) {
       console.error('Error:', error)
@@ -228,6 +172,34 @@ export default function SentimentAnalyzer() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const clearDatabase = async () => {
+    if (!confirm('Are you sure you want to clear all database records? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/clear-data', {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setDatabaseStats(null)
+        setRecentEntries([])
+        toast({
+          title: 'Database Cleared',
+          description: 'All sentiment data has been removed from the database',
+        })
+      }
+    } catch (error) {
+      console.error('Error clearing database:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to clear database',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -308,13 +280,11 @@ export default function SentimentAnalyzer() {
     
     const sentimentCounts = { positive: 0, negative: 0, neutral: 0 }
     
-    results.filter(r => r.status === 'success').forEach(result => {
+    results.forEach(result => {
       sentimentCounts[result.predicted_class] = (sentimentCounts[result.predicted_class] || 0) + 1
     })
     
-    const total = results.filter(r => r.status === 'success').length
-    if (total === 0) return []
-    
+    const total = results.length
     const colors = {
       positive: '#22c55e',
       negative: '#ef4444',
@@ -333,8 +303,6 @@ export default function SentimentAnalyzer() {
 
   const renderBatchPieChart = (results) => {
     const data = prepareBatchPieChartData(results)
-    
-    if (data.length === 0) return null;
     
     return (
       <div className="mt-4">
@@ -366,47 +334,124 @@ export default function SentimentAnalyzer() {
     )
   }
 
-  // Initialize API health check on component mount
-  useState(() => {
-    checkApiHealth();
-  }, []);
-
   return (
     <div className="bg-white p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Header with API Status */}
+      <div className="max-w-6xl mx-auto space-y-6">
+        {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
             <Brain className="h-8 w-8 text-red-600" />
-            <h1 className="text-3xl font-bold text-gray-900">AI Sentiment Analyzer</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Sentiment Analyzer</h1>
           </div>
-          <p className="text-gray-600">Analyze sentiment using BRIN's trained Bi-LSTM model</p>
-          
-          {/* API Status Indicator */}
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <div className={`w-2 h-2 rounded-full ${
-              apiStatus === 'ready' ? 'bg-green-500' : 
-              apiStatus === 'loading' ? 'bg-yellow-500' : 
-              apiStatus === 'error' ? 'bg-red-500' : 'bg-gray-400'
-            }`}></div>
-            <span className="text-xs text-gray-500">
-              {apiStatus === 'ready' ? 'API Ready' : 
-               apiStatus === 'loading' ? 'API Loading...' : 
-               apiStatus === 'error' ? 'API Unavailable' : 'Checking API...'}
-            </span>
-          </div>
+          <p className="text-gray-600">Analyze the emotional tone of your text using AI</p>
         </div>
 
-        {/* API Warning for cold start */}
-        {apiStatus === 'loading' && (
-          <Card className="border-yellow-200 bg-yellow-50">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 text-yellow-800">
-                <AlertCircle className="h-4 w-4" />
-                <span className="text-sm">
-                  API is warming up (cold start). This may take 30-60 seconds. Please wait...
-                </span>
+        {/* Database Statistics Card */}
+        {databaseStats && (
+          <Card className="shadow-sm border border-gray-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-gray-900">
+                <Database className="h-5 w-5 text-red-600" />
+                Database Statistics
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearDatabase}
+                  className="ml-auto text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Clear Data
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Total entries: {databaseStats.database_info?.total_entries || 0} | 
+                Last updated: {databaseStats.database_info?.last_updated ? 
+                  new Date(databaseStats.database_info.last_updated).toLocaleString() : 'Never'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Statistics Table */}
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Sentiment Distribution
+                  </h4>
+                  <div className="space-y-2">
+                    {databaseStats.statistics?.map((stat) => (
+                      <div key={stat.predicted_class} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          {getSentimentIcon(stat.predicted_class)}
+                          <span className="capitalize font-medium text-gray-900">{stat.predicted_class}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-gray-900">{stat.count} entries</div>
+                          <div className="text-xs text-gray-600">{stat.percentage}%</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Database Chart */}
+                <div>
+                  {databaseStats.chart_data && databaseStats.chart_data.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-3">Database Overview</h4>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                          <Pie
+                            data={databaseStats.chart_data}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={40}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="count"
+                          >
+                            {databaseStats.chart_data.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value, name) => [`${value} entries`, name]}
+                          />
+                          <Legend 
+                            formatter={(value, entry) => `${value}: ${entry.payload.count}`}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Recent Entries */}
+              {recentEntries.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-medium text-gray-900 mb-3">Recent Analyses</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {recentEntries.map((entry) => (
+                      <div key={entry.id} className="flex items-start justify-between p-2 bg-gray-50 rounded text-sm">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-gray-700 truncate" title={entry.text}>
+                            "{entry.text}"
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(entry.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 ml-2">
+                          {getSentimentIcon(entry.predicted_class)}
+                          <Badge className={`${getSentimentColor(entry.predicted_class)} text-xs`}>
+                            {entry.predicted_class}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
@@ -436,13 +481,11 @@ export default function SentimentAnalyzer() {
           <Card className="shadow-sm border border-gray-200">
             <CardHeader>
               <CardTitle className="text-gray-900">Analyze Single Text</CardTitle>
-              <CardDescription>
-                Enter your text about autonomous vehicles to analyze its sentiment
-              </CardDescription>
+              <CardDescription>Enter your text below to analyze its sentiment</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="Enter your text here... (e.g., 'I love autonomous vehicles!' or 'Self-driving cars are scary')"
+                placeholder="Enter your text here... (e.g., 'I love autonomous vehicles!' or 'Self-driving cars are dangerous')"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 className="min-h-[120px] resize-none border-gray-200 focus:border-red-500 focus:ring-red-500"
@@ -450,21 +493,14 @@ export default function SentimentAnalyzer() {
               />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">{text.length}/1000 characters</span>
-                <Button 
-                  onClick={analyzeSentiment} 
-                  disabled={loading || apiStatus === 'error'} 
-                  className="bg-red-600 hover:bg-red-700"
-                >
+                <Button onClick={analyzeSentiment} disabled={loading} className="bg-red-600 hover:bg-red-700">
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Analyzing...
                     </>
                   ) : (
-                    <>
-                      <Brain className="mr-2 h-4 w-4" />
-                      Analyze Sentiment
-                    </>
+                    'Analyze Sentiment'
                   )}
                 </Button>
               </div>
@@ -479,15 +515,16 @@ export default function SentimentAnalyzer() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="p-3 bg-gray-50 rounded-lg border">
-                      <p className="text-sm text-gray-700 italic">"{result.text}"</p>
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-700 font-medium">Analyzed Text:</p>
+                      <p className="text-gray-900 mt-1">"{result.text}"</p>
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
                       <Badge className={getSentimentColor(result.predicted_class)}>
                         {result.predicted_class.toUpperCase()}
                       </Badge>
-                      <span className="text-sm text-gray-600">{(result.confidence * 100).toFixed(2)}% confidence</span>
+                      <span className="text-sm text-gray-600">{(result.confidence * 100).toFixed(1)}% confidence</span>
                     </div>
 
                     <div className="space-y-2">
@@ -496,7 +533,7 @@ export default function SentimentAnalyzer() {
                         <div key={sentiment} className="space-y-1">
                           <div className="flex justify-between text-sm">
                             <span className="capitalize text-gray-700">{sentiment}</span>
-                            <span className="text-gray-600">{(prob * 100).toFixed(2)}%</span>
+                            <span className="text-gray-600">{(prob * 100).toFixed(1)}%</span>
                           </div>
                           <Progress value={prob * 100} className="h-2" />
                         </div>
@@ -516,41 +553,32 @@ export default function SentimentAnalyzer() {
           <Card className="shadow-sm border border-gray-200">
             <CardHeader>
               <CardTitle className="text-gray-900">Batch Analysis</CardTitle>
-              <CardDescription>
-                Enter multiple texts about autonomous vehicles (one per line) to analyze them all at once
-              </CardDescription>
+              <CardDescription>Enter multiple texts (one per line) to analyze them all at once</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
                 placeholder={`Enter multiple texts, one per line:
-I love Tesla Autopilot!
+I love autonomous vehicles!
 Self-driving cars are dangerous
-Lane assist is helpful
-FSD is the future
-Waymo technology seems promising`}
+Autopilot is okay but needs improvement
+Tesla FSD is amazing technology
+Lane assist feature is helpful`}
                 value={batchTexts}
                 onChange={(e) => setBatchTexts(e.target.value)}
                 className="min-h-[150px] resize-none border-gray-200 focus:border-red-500 focus:ring-red-500"
               />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-500">
-                  {batchTexts.split('\n').filter((t) => t.trim()).length} texts to analyze (max 50)
+                  {batchTexts.split('\n').filter((t) => t.trim()).length} texts to analyze
                 </span>
-                <Button 
-                  onClick={analyzeBatch} 
-                  disabled={loading || apiStatus === 'error'} 
-                  className="bg-red-600 hover:bg-red-700"
-                >
+                <Button onClick={analyzeBatch} disabled={loading} className="bg-red-600 hover:bg-red-700">
                   {loading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Analyzing...
                     </>
                   ) : (
-                    <>
-                      <Brain className="mr-2 h-4 w-4" />
-                      Analyze Batch
-                    </>
+                    'Analyze Batch'
                   )}
                 </Button>
               </div>
@@ -558,55 +586,27 @@ Waymo technology seems promising`}
               {/* Batch Results */}
               {batchResults.length > 0 && (
                 <div className="mt-6 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-gray-900">
-                      Batch Results ({batchResults.filter(r => r.status === 'success').length} successful)
-                    </h3>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setBatchResults([])}
-                    >
-                      Clear Results
-                    </Button>
-                  </div>
+                  <h3 className="font-semibold text-gray-900">Batch Results ({batchResults.length} texts)</h3>
                   
                   {/* Batch Pie Chart */}
                   {renderBatchPieChart(batchResults)}
                   
                   <div className="space-y-2 max-h-96 overflow-y-auto">
                     {batchResults.map((result, index) => (
-                      <Card key={index} className={`p-3 ${
-                        result.status === 'success' ? 'border-gray-200' : 'border-red-200 bg-red-50'
-                      }`}>
+                      <Card key={index} className="p-3 border border-gray-200">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-gray-700 truncate" title={result.text}>
-                              "{result.text}"
+                              {result.text}
                             </p>
-                            {result.error && (
-                              <p className="text-xs text-red-600 mt-1">{result.error}</p>
-                            )}
                           </div>
-                          {result.status === 'success' && (
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              {getSentimentIcon(result.predicted_class)}
-                              <Badge className={`${getSentimentColor(result.predicted_class)} text-xs`}>
-                                {result.predicted_class}
-                              </Badge>
-                              <span className="text-xs text-gray-500">
-                                {(result.confidence * 100).toFixed(1)}%
-                              </span>
-                            </div>
-                          )}
-                          {result.status !== 'success' && (
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                              <AlertCircle className="h-4 w-4 text-red-500" />
-                              <Badge className="bg-red-50 text-red-700 border-red-200 text-xs">
-                                Error
-                              </Badge>
-                            </div>
-                          )}
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            {getSentimentIcon(result.predicted_class)}
+                            <Badge className={`${getSentimentColor(result.predicted_class)} text-xs`}>
+                              {result.predicted_class}
+                            </Badge>
+                            <span className="text-xs text-gray-500">{(result.confidence * 100).toFixed(0)}%</span>
+                          </div>
                         </div>
                       </Card>
                     ))}
@@ -618,8 +618,8 @@ Waymo technology seems promising`}
         )}
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500 space-y-1">
-          <p>Powered by BRIN Bi-LSTM Model • Real-time processing</p>
+        <div className="text-center text-sm text-gray-500">
+          <p>Powered by BRIN Deep Learning Model • Data saved to local database</p>
         </div>
       </div>
     </div>

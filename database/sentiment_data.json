@@ -1,0 +1,42 @@
+{
+  "sentiment_analysis": [
+    {
+      "id": 1,
+      "text": "car so cool",
+      "predicted_class": "positive",
+      "confidence": 0.9996943473815918,
+      "positive_prob": 0.9996943473815918,
+      "negative_prob": 0.00022268413158599287,
+      "neutral_prob": 0.0000829947748570703,
+      "created_at": "2025-08-18T15:05:56.193Z",
+      "source": "web_analyzer"
+    },
+    {
+      "id": 2,
+      "text": "car so cool but design ugly",
+      "predicted_class": "positive",
+      "confidence": 0.9071658253669739,
+      "positive_prob": 0.9071658253669739,
+      "negative_prob": 0.09279561787843704,
+      "neutral_prob": 0.00003852421650663018,
+      "created_at": "2025-08-18T15:06:15.887Z",
+      "source": "web_analyzer"
+    },
+    {
+      "id": 3,
+      "text": "design ugly",
+      "predicted_class": "negative",
+      "confidence": 0.9981027245521545,
+      "positive_prob": 0.0006662306841462851,
+      "negative_prob": 0.9981027245521545,
+      "neutral_prob": 0.0012310685124248266,
+      "created_at": "2025-08-18T15:06:25.074Z",
+      "source": "web_analyzer"
+    }
+  ],
+  "metadata": {
+    "created_at": "2025-08-18T15:05:15.051Z",
+    "total_entries": 3,
+    "last_updated": "2025-08-18T15:06:25.074Z"
+  }
+}
