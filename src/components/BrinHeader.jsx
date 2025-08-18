@@ -17,7 +17,7 @@ function BrinHeader({ onNavigate, activeSection }) {
   };
 
   return (
-    <header className="bg-white shadow-lg border-b-4 border-red-600 sticky top-0 z-50">
+    <header className="bg-white shadow-lg border-b-4 border-red-50 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center space-x-4">
@@ -32,18 +32,15 @@ function BrinHeader({ onNavigate, activeSection }) {
                     e.target.nextElementSibling.style.display = 'flex';
                   }}
                 />
-                <div className="w-12 h-12 bg-red-600 rounded-full items-center justify-center hidden">
-                  <Brain className="w-8 h-8 text-white" />
-                </div>
+      
               </div>
               <div className="ml-3">
-                <h1 className="text-xl font-bold text-red-800">BRIN</h1>
+                <h1 className="text-xl font-bold text-red-600">BRIN</h1>
                 <p className="text-xs text-gray-600 hidden sm:block">Badan Riset dan Inovasi Nasional</p>
               </div>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -53,7 +50,7 @@ function BrinHeader({ onNavigate, activeSection }) {
                   onClick={() => handleNavigation(item.id)}
                   className={`flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                     activeSection === item.id
-                      ? 'text-red-800 bg-red-50 border-b-2 border-red-600'
+                      ? 'text-red-600 bg-red-50 border-b-2 shadow-xl border-red-50'
                       : 'text-gray-700 hover:text-red-800 hover:bg-gray-50'
                   }`}
                 >
@@ -64,7 +61,6 @@ function BrinHeader({ onNavigate, activeSection }) {
             })}
           </nav>
 
-          {/* Mobile menu button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -75,7 +71,6 @@ function BrinHeader({ onNavigate, activeSection }) {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-200 py-4">
             <nav className="flex flex-col space-y-2">
