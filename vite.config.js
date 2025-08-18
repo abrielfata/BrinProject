@@ -6,20 +6,20 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
+      // Proxy API calls to local backend
       '/api': {
-        target: 'https://sentiment-api1.onrender.com',
+        target: 'http://localhost:3001',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        secure: true,
-        configure: (proxy, options) => {
-          proxy.on('error', (err, req, res) => {
-            console.log('proxy error', err);
+        secure: false,
+        configure: (proxy) => {
+          proxy.on('error', (err) => {
+            console.log('Proxy error:', err);
           });
-          proxy.on('proxyReq', (proxyReq, req, res) => {
-            console.log('Sending Request to the Target:', req.method, req.url);
+          proxy.on('proxyReq', (proxyReq, req) => {
+            console.log('Sending Request to Backend:', req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req, res) => {
-            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          proxy.on('proxyRes', (proxyRes, req) => {
+            console.log('Received Response from Backend:', proxyRes.statusCode, req.url);
           });
         },
       }
