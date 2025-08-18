@@ -1,10 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from './ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card'
 import { Textarea } from './ui/Textarea'
 import { Badge } from './ui/Badge'
 import { Progress } from './ui/Progress'
-import { Loader2, Brain, TrendingUp, TrendingDown, Minus } from 'lucide-react'
+import { Loader2, Brain, TrendingUp, TrendingDown, Minus, Database, BarChart3, Trash2 } from 'lucide-react'
 import { useToast } from '../hooks/useToast'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 
@@ -15,7 +15,50 @@ export default function SentimentAnalyzer() {
   const [batchResults, setBatchResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('single')
+  const [databaseStats, setDatabaseStats] = useState(null)
+  const [recentEntries, setRecentEntries] = useState([])
   const { toast } = useToast()
+
+  // Load database statistics when component mounts
+  useEffect(() => {
+    loadDatabaseStats()
+  }, [])
+
+  const loadDatabaseStats = async () => {
+    try {
+      const response = await fetch('/api/sentiment-stats')
+      if (response.ok) {
+        const data = await response.json()
+        setDatabaseStats(data)
+        setRecentEntries(data.recent_entries || [])
+      }
+    } catch (error) {
+      console.error('Error loading database stats:', error)
+    }
+  }
+
+  const saveToDatabase = async (sentimentData) => {
+    try {
+      const response = await fetch('/api/save-sentiment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sentimentData),
+      })
+
+      if (response.ok) {
+        const saveResult = await response.json()
+        console.log('✅ Data saved to database:', saveResult.data.id)
+        // Reload stats after saving
+        loadDatabaseStats()
+        return true
+      }
+    } catch (error) {
+      console.error('Error saving to database:', error)
+    }
+    return false
+  }
 
   const analyzeSentiment = async () => {
     if (!text.trim()) {
@@ -29,7 +72,8 @@ export default function SentimentAnalyzer() {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/predict', {
+      // Call external sentiment API
+      const response = await fetch('/sentiment-api/predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,9 +91,12 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setResult(data)
       
+      // Save to local database
+      const saved = await saveToDatabase(data)
+      
       toast({
         title: 'Analysis Complete',
-        description: `Sentiment: ${data.predicted_class} (${(data.confidence * 100).toFixed(1)}% confidence)`,
+        description: `Sentiment: ${data.predicted_class} (${(data.confidence * 100).toFixed(1)}% confidence)${saved ? ' - Saved to database' : ''}`,
       })
     } catch (error) {
       console.error('Error:', error)
@@ -80,7 +127,8 @@ export default function SentimentAnalyzer() {
 
     setLoading(true)
     try {
-      const response = await fetch('/api/batch_predict', {
+      // Call external batch API
+      const response = await fetch('/sentiment-api/batch_predict', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -97,9 +145,19 @@ export default function SentimentAnalyzer() {
 
       const data = await response.json()
       setBatchResults(data.results)
+      
+      // Save each result to database
+      let savedCount = 0
+      for (const result of data.results) {
+        if (result.status === 'success') {
+          const saved = await saveToDatabase(result)
+          if (saved) savedCount++
+        }
+      }
+
       toast({
         title: 'Batch Analysis Complete',
-        description: `Analyzed ${data.total_processed} texts successfully`,
+        description: `Analyzed ${data.total_processed} texts, saved ${savedCount} to database`,
       })
     } catch (error) {
       console.error('Error:', error)
@@ -114,6 +172,34 @@ export default function SentimentAnalyzer() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const clearDatabase = async () => {
+    if (!confirm('Are you sure you want to clear all database records? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch('/api/clear-data', {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setDatabaseStats(null)
+        setRecentEntries([])
+        toast({
+          title: 'Database Cleared',
+          description: 'All sentiment data has been removed from the database',
+        })
+      }
+    } catch (error) {
+      console.error('Error clearing database:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to clear database',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -250,7 +336,7 @@ export default function SentimentAnalyzer() {
 
   return (
     <div className="bg-white p-4">
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
           <div className="flex items-center justify-center gap-2">
@@ -259,6 +345,116 @@ export default function SentimentAnalyzer() {
           </div>
           <p className="text-gray-600">Analyze the emotional tone of your text using AI</p>
         </div>
+
+        {/* Database Statistics Card */}
+        {databaseStats && (
+          <Card className="shadow-sm border border-gray-200">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-gray-900">
+                <Database className="h-5 w-5 text-red-600" />
+                Database Statistics
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearDatabase}
+                  className="ml-auto text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Clear Data
+                </Button>
+              </CardTitle>
+              <CardDescription>
+                Total entries: {databaseStats.database_info?.total_entries || 0} | 
+                Last updated: {databaseStats.database_info?.last_updated ? 
+                  new Date(databaseStats.database_info.last_updated).toLocaleString() : 'Never'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Statistics Table */}
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Sentiment Distribution
+                  </h4>
+                  <div className="space-y-2">
+                    {databaseStats.statistics?.map((stat) => (
+                      <div key={stat.predicted_class} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          {getSentimentIcon(stat.predicted_class)}
+                          <span className="capitalize font-medium text-gray-900">{stat.predicted_class}</span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-medium text-gray-900">{stat.count} entries</div>
+                          <div className="text-xs text-gray-600">{stat.percentage}%</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Database Chart */}
+                <div>
+                  {databaseStats.chart_data && databaseStats.chart_data.length > 0 && (
+                    <div>
+                      <h4 className="font-medium text-gray-900 mb-3">Database Overview</h4>
+                      <ResponsiveContainer width="100%" height={200}>
+                        <PieChart>
+                          <Pie
+                            data={databaseStats.chart_data}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={40}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="count"
+                          >
+                            {databaseStats.chart_data.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip 
+                            formatter={(value, name) => [`${value} entries`, name]}
+                          />
+                          <Legend 
+                            formatter={(value, entry) => `${value}: ${entry.payload.count}`}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Recent Entries */}
+              {recentEntries.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-medium text-gray-900 mb-3">Recent Analyses</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {recentEntries.map((entry) => (
+                      <div key={entry.id} className="flex items-start justify-between p-2 bg-gray-50 rounded text-sm">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-gray-700 truncate" title={entry.text}>
+                            "{entry.text}"
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {new Date(entry.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 ml-2">
+                          {getSentimentIcon(entry.predicted_class)}
+                          <Badge className={`${getSentimentColor(entry.predicted_class)} text-xs`}>
+                            {entry.predicted_class}
+                          </Badge>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Tab Navigation */}
         <div className="flex justify-center">
@@ -289,7 +485,7 @@ export default function SentimentAnalyzer() {
             </CardHeader>
             <CardContent className="space-y-4">
               <Textarea
-                placeholder="Enter your text here... (e.g., 'I love this product!' or 'This is disappointing')"
+                placeholder="Enter your text here... (e.g., 'I love autonomous vehicles!' or 'Self-driving cars are dangerous')"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 className="min-h-[120px] resize-none border-gray-200 focus:border-red-500 focus:ring-red-500"
@@ -319,6 +515,11 @@ export default function SentimentAnalyzer() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-700 font-medium">Analyzed Text:</p>
+                      <p className="text-gray-900 mt-1">"{result.text}"</p>
+                    </div>
+
                     <div className="flex items-center gap-2">
                       <Badge className={getSentimentColor(result.predicted_class)}>
                         {result.predicted_class.toUpperCase()}
@@ -357,10 +558,11 @@ export default function SentimentAnalyzer() {
             <CardContent className="space-y-4">
               <Textarea
                 placeholder={`Enter multiple texts, one per line:
-I love this product!
-This is terrible quality
-It's okay, nothing special
-Amazing customer service`}
+I love autonomous vehicles!
+Self-driving cars are dangerous
+Autopilot is okay but needs improvement
+Tesla FSD is amazing technology
+Lane assist feature is helpful`}
                 value={batchTexts}
                 onChange={(e) => setBatchTexts(e.target.value)}
                 className="min-h-[150px] resize-none border-gray-200 focus:border-red-500 focus:ring-red-500"
@@ -417,7 +619,7 @@ Amazing customer service`}
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500">
-          <p>Powered by AI sentiment analysis • Real-time processing</p>
+          <p>Powered by BRIN Deep Learning Model • Data saved to local database</p>
         </div>
       </div>
     </div>
