@@ -208,11 +208,22 @@
       "neutral_prob": 0.0223,
       "created_at": "2025-08-18T14:23:13.106Z",
       "source": "web_analyzer"
+    },
+    {
+      "id": 20,
+      "text": "This autonomous vehicle feature is incredibly impressive!",
+      "predicted_class": "positive",
+      "confidence": 0.9543,
+      "positive_prob": 0.9543,
+      "negative_prob": 0.0234,
+      "neutral_prob": 0.0223,
+      "created_at": "2025-08-18T14:45:16.721Z",
+      "source": "web_analyzer"
     }
   ],
   "metadata": {
     "created_at": "2025-08-18T13:58:28.804Z",
-    "total_entries": 19,
-    "last_updated": "2025-08-18T14:23:13.106Z"
+    "total_entries": 20,
+    "last_updated": "2025-08-18T14:45:16.721Z"
   }
 }
