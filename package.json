@@ -8,16 +8,19 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "db:setup": "node src/database/setup.js"
+    "backend": "cd backend && npm start",
+    "db:test": "node database/testJSON.js",
+    "setup": "npm install && cd backend && npm install",
+    "start:backend": "cd backend && npm start",
+    "start:frontend": "npm run dev",
+    "test:api": "cd backend && node test-endpoints.js"
   },
   "dependencies": {
     "clsx": "^2.1.1",
     "lucide-react": "^0.539.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "recharts": "^3.1.2",
-    "sqlite3": "^5.1.6",
-    "better-sqlite3": "^9.2.2"
+    "recharts": "^3.1.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.32.0",
