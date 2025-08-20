@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Textarea } from './ui/Textarea'
 import { Badge } from './ui/Badge'
 import { Progress } from './ui/Progress'
-import { Loader2, Brain, TrendingUp, TrendingDown, Minus, Database, BarChart3, Trash2, Target, Activity } from 'lucide-react'
+import { Loader2, Brain, TrendingUp, TrendingDown, Minus, Database, BarChart3, Trash2 } from 'lucide-react'
 import { useToast } from '../hooks/useToast'
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
 
@@ -26,7 +26,7 @@ export default function SentimentAnalyzer() {
 
   const loadDatabaseStats = async () => {
     try {
-      const response = await fetch('/api/sentiment-stats')
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sentiment-stats`)
       if (response.ok) {
         const data = await response.json()
         setDatabaseStats(data)
@@ -39,7 +39,7 @@ export default function SentimentAnalyzer() {
 
   const saveToDatabase = async (sentimentData) => {
     try {
-      const response = await fetch('/api/save-sentiment', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/save-sentiment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -72,8 +72,8 @@ export default function SentimentAnalyzer() {
 
     setLoading(true)
     try {
-      // Call external sentiment API
-      const response = await fetch('/sentiment-api/predict', {
+      // Call sentiment API via backend proxy
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -90,9 +90,6 @@ export default function SentimentAnalyzer() {
 
       const data = await response.json()
       setResult(data)
-      
-      // Clear the text input after successful analysis
-      setText('')
       
       // Save to local database
       const saved = await saveToDatabase(data)
@@ -130,8 +127,8 @@ export default function SentimentAnalyzer() {
 
     setLoading(true)
     try {
-      // Call external batch API
-      const response = await fetch('/sentiment-api/batch_predict', {
+      // Call batch API via backend proxy
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/batch_predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,9 +145,6 @@ export default function SentimentAnalyzer() {
 
       const data = await response.json()
       setBatchResults(data.results)
-      
-      // Clear the batch texts input after successful analysis
-      setBatchTexts('')
       
       // Save each result to database
       let savedCount = 0
@@ -178,6 +172,34 @@ export default function SentimentAnalyzer() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const clearDatabase = async () => {
+    if (!confirm('Are you sure you want to clear all database records? This action cannot be undone.')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/clear-data`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setDatabaseStats(null)
+        setRecentEntries([])
+        toast({
+          title: 'Database Cleared',
+          description: 'All sentiment data has been removed from the database',
+        })
+      }
+    } catch (error) {
+      console.error('Error clearing database:', error)
+      toast({
+        title: 'Error',
+        description: 'Failed to clear database',
+        variant: 'destructive',
+      })
     }
   }
 
@@ -224,20 +246,17 @@ export default function SentimentAnalyzer() {
     const data = preparePieChartData(probabilities)
     
     return (
-      <div className="mt-6 p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-100">
-        <div className="flex items-center gap-2 mb-4">
-          <Activity className="h-4 w-4 text-gray-600" />
-          <h4 className="text-sm font-semibold text-gray-900">Probability Distribution</h4>
-        </div>
-        <ResponsiveContainer width="100%" height={220}>
+      <div className="mt-4">
+        <h4 className="text-sm font-medium mb-2 text-gray-900">Probability Distribution</h4>
+        <ResponsiveContainer width="100%" height={200}>
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={45}
-              outerRadius={85}
-              paddingAngle={3}
+              innerRadius={40}
+              outerRadius={80}
+              paddingAngle={5}
               dataKey="probability"
             >
               {data.map((entry, index) => (
@@ -246,16 +265,9 @@ export default function SentimentAnalyzer() {
             </Pie>
             <Tooltip 
               formatter={(value, name) => [`${(value * 100).toFixed(1)}%`, name]}
-              contentStyle={{
-                backgroundColor: 'white',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}
             />
             <Legend 
               formatter={(value, entry) => `${value}: ${entry.payload.value}%`}
-              wrapperStyle={{ fontSize: '12px' }}
             />
           </PieChart>
         </ResponsiveContainer>
@@ -331,7 +343,7 @@ export default function SentimentAnalyzer() {
             <Brain className="h-8 w-8 text-red-600" />
             <h1 className="text-3xl font-bold text-gray-900">Sentiment Analyzer</h1>
           </div>
-          <p className="text-gray-600">Analyze the emotional tone of your text using AI • Use English text for best results</p>
+          <p className="text-gray-600">Analyze the emotional tone of your text using AI</p>
         </div>
 
         {/* Database Statistics Card */}
@@ -341,6 +353,15 @@ export default function SentimentAnalyzer() {
               <CardTitle className="flex items-center gap-2 text-gray-900">
                 <Database className="h-5 w-5 text-red-600" />
                 Database Statistics
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearDatabase}
+                  className="ml-auto text-red-600 border-red-200 hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Clear Data
+                </Button>
               </CardTitle>
               <CardDescription>
                 Total entries: {databaseStats.database_info?.total_entries || 0} | 
@@ -463,11 +484,8 @@ export default function SentimentAnalyzer() {
               <CardDescription>Enter your text below to analyze its sentiment</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800 font-medium">📝 Note: Please write your text in English for optimal analysis accuracy</p>
-              </div>
               <Textarea
-                placeholder="Enter your text here in English... (e.g., 'I love autonomous vehicles!' or 'Self-driving cars are dangerous')"
+                placeholder="Enter your text here... (e.g., 'I love autonomous vehicles!' or 'Self-driving cars are dangerous')"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 className="min-h-[120px] resize-none border-gray-200 focus:border-red-500 focus:ring-red-500"
@@ -487,83 +505,44 @@ export default function SentimentAnalyzer() {
                 </Button>
               </div>
 
-              {/* Modernized Single Result */}
+              {/* Single Result */}
               {result && (
-                <div className="mt-6">
-                  <Card className="border border-gray-200 bg-gradient-to-br from-white via-gray-50/30 to-white shadow-lg">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-3 text-gray-900">
-                          <div className="p-2 rounded-lg bg-gray-100">
-                            {getSentimentIcon(result.predicted_class)}
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Analysis Complete</h3>
-                            <p className="text-sm font-normal text-gray-600 mt-1">AI-powered sentiment detection</p>
-                          </div>
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Target className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm text-gray-600 font-medium">{(result.confidence * 100).toFixed(1)}% accuracy</span>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-6">
-                      {/* Analyzed Text Display */}
-                      <div className="relative">
-                        <div className="absolute -left-2 top-2 w-1 h-12 bg-red-500 rounded-full"></div>
-                        <div className="pl-4 pr-4 py-3 bg-white/80 backdrop-blur-sm rounded-xl border border-gray-100 shadow-sm">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Input Text</p>
-                          <p className="text-gray-900 leading-relaxed">"{result.text}"</p>
-                        </div>
-                      </div>
+                <Card className="mt-6 border border-gray-200">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-gray-900">
+                      {getSentimentIcon(result.predicted_class)}
+                      Analysis Result
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-3 bg-gray-50 rounded-lg">
+                      <p className="text-sm text-gray-700 font-medium">Analyzed Text:</p>
+                      <p className="text-gray-900 mt-1">"{result.text}"</p>
+                    </div>
 
-                      {/* Primary Result */}
-                      <div className="flex items-center gap-4 p-4 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-100">
-                        <div className="flex items-center gap-3">
-                          <div className="p-3 rounded-full bg-gradient-to-br from-gray-100 to-gray-200">
-                            {getSentimentIcon(result.predicted_class)}
-                          </div>
-                          <div>
-                            <Badge className={`${getSentimentColor(result.predicted_class)} text-sm px-3 py-1 font-semibold`}>
-                              {result.predicted_class.toUpperCase()}
-                            </Badge>
-                            <p className="text-xs text-gray-600 mt-1">Primary classification</p>
-                          </div>
-                        </div>
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getSentimentColor(result.predicted_class)}>
+                        {result.predicted_class.toUpperCase()}
+                      </Badge>
+                      <span className="text-sm text-gray-600">{(result.confidence * 100).toFixed(1)}% confidence</span>
+                    </div>
 
-                      {/* Probability Breakdown */}
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-2 mb-4">
-                          <BarChart3 className="h-4 w-4 text-gray-600" />
-                          <h4 className="font-semibold text-gray-900">Detailed Breakdown</h4>
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-gray-900">Probability Breakdown:</h4>
+                      {Object.entries(result.all_probabilities).map(([sentiment, prob]) => (
+                        <div key={sentiment} className="space-y-1">
+                          <div className="flex justify-between text-sm">
+                            <span className="capitalize text-gray-700">{sentiment}</span>
+                            <span className="text-gray-600">{(prob * 100).toFixed(1)}%</span>
+                          </div>
+                          <Progress value={prob * 100} className="h-2" />
                         </div>
-                        
-                        <div className="grid gap-3">
-                          {Object.entries(result.all_probabilities).map(([sentiment, prob]) => (
-                            <div key={sentiment} className="p-3 bg-white/50 backdrop-blur-sm rounded-lg border border-gray-100">
-                              <div className="flex justify-between items-center mb-2">
-                                <div className="flex items-center gap-2">
-                                  {getSentimentIcon(sentiment)}
-                                  <span className="capitalize font-medium text-gray-800">{sentiment}</span>
-                                </div>
-                                <span className="text-sm font-bold text-gray-900">{(prob * 100).toFixed(1)}%</span>
-                              </div>
-                              <div className="relative">
-                                <Progress value={prob * 100} className="h-2.5" />
-                                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-transparent via-white/30 to-transparent pointer-events-none"></div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      ))}
+                    </div>
 
-                      {renderPieChart(result.all_probabilities)}
-                    </CardContent>
-                  </Card>
-                </div>
+                    {renderPieChart(result.all_probabilities)}
+                  </CardContent>
+                </Card>
               )}
             </CardContent>
           </Card>
@@ -577,11 +556,8 @@ export default function SentimentAnalyzer() {
               <CardDescription>Enter multiple texts (one per line) to analyze them all at once</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <p className="text-sm text-blue-800 font-medium">📝 Note: Please write your texts in English for optimal analysis accuracy</p>
-              </div>
               <Textarea
-                placeholder={`Enter multiple texts in English, one per line:
+                placeholder={`Enter multiple texts, one per line:
 I love autonomous vehicles!
 Self-driving cars are dangerous
 Autopilot is okay but needs improvement

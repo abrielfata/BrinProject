@@ -2,6 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
 import {
   insertSentimentAnalysis,
   getAllSentimentData,
@@ -9,32 +13,52 @@ import {
   getChartData,
   getRecentEntries,
   getDatabaseInfo,
-  initializeDatabase
-} from '../database/jsonDB.js';
+  initializeDatabase,
+  clearAllData
+} from './postgresDB.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-initializeDatabase();
+// Initialize PostgreSQL database
+(async () => {
+  try {
+    await initializeDatabase();
+  } catch (error) {
+    console.error('❌ Failed to initialize database:', error);
+    process.exit(1);
+  }
+})();
 
-app.get('/api/health', (req, res) => {
-  const dbInfo = getDatabaseInfo();
-  res.json({
-    status: 'OK',
-    message: 'Database API is running',
-    database: {
-      total_entries: dbInfo?.total_entries || 0,
-      file_size: dbInfo?.file_size || 0,
-      last_updated: dbInfo?.last_updated
-    },
-    timestamp: new Date().toISOString()
-  });
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbInfo = await getDatabaseInfo();
+    res.json({
+      status: 'OK',
+      message: 'Database API is running',
+      database: {
+        total_entries: dbInfo?.total_entries || 0,
+        database_type: dbInfo?.database_type || 'PostgreSQL',
+        connection_status: dbInfo?.connection_status || 'unknown',
+        last_updated: dbInfo?.last_updated
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      status: 'ERROR',
+      message: 'Database connection failed',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 app.post('/api/save-sentiment', async (req, res) => {
@@ -57,8 +81,10 @@ app.post('/api/save-sentiment', async (req, res) => {
     });
     
     if (result.success) {
-      const stats = getSentimentStats();
-      const chartData = getChartData();
+      const [stats, chartData] = await Promise.all([
+        getSentimentStats(),
+        getChartData()
+      ]);
       
       res.json({
         success: true,
@@ -83,10 +109,10 @@ app.post('/api/save-sentiment', async (req, res) => {
   }
 });
 
-app.get('/api/sentiment-data', (req, res) => {
+app.get('/api/sentiment-data', async (req, res) => {
   try {
     const { limit } = req.query;
-    const allData = getAllSentimentData();
+    const allData = await getAllSentimentData();
     
     const data = limit ? allData.slice(0, parseInt(limit)) : allData;
     
@@ -104,12 +130,14 @@ app.get('/api/sentiment-data', (req, res) => {
   }
 });
 
-app.get('/api/sentiment-stats', (req, res) => {
+app.get('/api/sentiment-stats', async (req, res) => {
   try {
-    const stats = getSentimentStats();
-    const chartData = getChartData();
-    const recentEntries = getRecentEntries(5);
-    const dbInfo = getDatabaseInfo();
+    const [stats, chartData, recentEntries, dbInfo] = await Promise.all([
+      getSentimentStats(),
+      getChartData(),
+      getRecentEntries(5),
+      getDatabaseInfo()
+    ]);
     
     res.json({
       success: true,
@@ -118,7 +146,8 @@ app.get('/api/sentiment-stats', (req, res) => {
       recent_entries: recentEntries,
       database_info: {
         total_entries: dbInfo?.total_entries || 0,
-        last_updated: dbInfo?.last_updated
+        last_updated: dbInfo?.last_updated,
+        database_type: dbInfo?.database_type || 'PostgreSQL'
       }
     });
   } catch (error) {
@@ -130,9 +159,9 @@ app.get('/api/sentiment-stats', (req, res) => {
   }
 });
 
-app.get('/api/chart-data', (req, res) => {
+app.get('/api/chart-data', async (req, res) => {
   try {
-    const chartData = getChartData();
+    const chartData = await getChartData();
     res.json({
       success: true,
       chart_data: chartData
@@ -146,37 +175,78 @@ app.get('/api/chart-data', (req, res) => {
   }
 });
 
-app.delete('/api/clear-data', (req, res) => {
+app.delete('/api/clear-data', async (req, res) => {
   try {
-    const emptyData = {
-      sentiment_analysis: [],
-      metadata: {
-        created_at: new Date().toISOString(),
-        total_entries: 0,
-        last_updated: new Date().toISOString()
-      }
-    };
+    const result = await clearAllData();
     
-    import('../database/jsonDB.js').then(({ writeDatabase }) => {
-      const saved = writeDatabase(emptyData);
-      if (saved) {
-        res.json({
-          success: true,
-          message: 'All sentiment data cleared successfully'
-        });
-      } else {
-        res.status(500).json({
-          success: false,
-          error: 'Failed to clear data'
-        });
-      }
-    });
+    if (result.success) {
+      res.json({
+        success: true,
+        message: 'All sentiment data cleared successfully'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.error || 'Failed to clear data'
+      });
+    }
     
   } catch (error) {
     console.error('Error clearing data:', error);
     res.status(500).json({
       success: false,
       error: 'Failed to clear data'
+    });
+  }
+});
+
+// Proxy endpoints for ML API to avoid CORS issues
+app.post('/api/predict', async (req, res) => {
+  try {
+    const response = await fetch('https://sentiment-4c5g.onrender.com/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(response.status).json(errorData);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('ML API predict error:', error);
+    res.status(500).json({
+      error: 'Failed to connect to ML API'
+    });
+  }
+});
+
+app.post('/api/batch_predict', async (req, res) => {
+  try {
+    const response = await fetch('https://sentiment-4c5g.onrender.com/batch_predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req.body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      return res.status(response.status).json(errorData);
+    }
+
+    const data = await response.json();
+    res.json(data);
+  } catch (error) {
+    console.error('ML API batch_predict error:', error);
+    res.status(500).json({
+      error: 'Failed to connect to ML API'
     });
   }
 });
