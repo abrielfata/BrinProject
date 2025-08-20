@@ -8,19 +8,13 @@ export default defineConfig({
     proxy: {
       // Proxy API calls to external sentiment API
       '/sentiment-api': {
-        target: 'https://sentiment-api1.onrender.com',
+        target: `https://sentiment-api1.onrender.com/`,
         changeOrigin: true,
         secure: true,
         rewrite: (path) => path.replace(/^\/sentiment-api/, ''),
         configure: (proxy) => {
           proxy.on('error', (err) => {
-            console.log('Sentiment API Proxy error:', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('Sending Request to Sentiment API:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req) => {
-            console.log('Received Response from Sentiment API:', proxyRes.statusCode, req.url);
+            console.error('Sentiment API Proxy error:', err);
           });
         },
       },
@@ -31,16 +25,11 @@ export default defineConfig({
         secure: false,
         configure: (proxy) => {
           proxy.on('error', (err) => {
-            console.log('Database API Proxy error:', err);
-          });
-          proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('Sending Request to Database:', req.method, req.url);
-          });
-          proxy.on('proxyRes', (proxyRes, req) => {
-            console.log('Received Response from Database:', proxyRes.statusCode, req.url);
+            console.error('Database API Proxy error:', err);
           });
         },
       }
     }
   }
+
 })
