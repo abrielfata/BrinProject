@@ -24,8 +24,9 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: 'https://brin-project-kp.vercel.app', 
-  credentials: true,
+  origin: "https://brin-project-kp.vercel.app", // allow your frontend
+  methods: ["GET", "POST"], // adjust as needed
+  credentials: true // if you're using cookies or auth headers
 }));
 app.use(express.json());
 
