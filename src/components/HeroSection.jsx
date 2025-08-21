@@ -82,12 +82,12 @@ function HeroSection({ onNavigateToAnalyzer }) {
               <div className="w-80 h-80 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center shadow-xl border border-gray-200">
                 <div className="w-64 h-64 rounded-full bg-white flex items-center justify-center shadow-lg border border-gray-100">
                   <img 
-                    src="/src/assets/brin-logo.png" 
-                    alt="BRIN Logo" 
-                    className="w-32 h-32 object-contain"
+                    src="/brin-logo.png" 
+                    alt="Logo" 
+                    className="w-12 h-12 object-contain"
                     onError={(e) => {
                       e.target.style.display = 'none';
-                      e.target.nextElementSibling.style.display = 'block';
+                      e.target.nextElementSibling && (e.target.nextElementSibling.style.display = 'flex');
                     }}
                   />
                   <Brain className="w-32 h-32 text-red-600 hidden" />

@@ -76,7 +76,7 @@ export default function SentimentAnalyzer() {
           
           setDatabaseStats(updatedStats)
           setRecentEntries(saveResult.recent_entries)
-          console.log('✅ State updated with fresh data')
+          console.log('✅ State updated with fresh data from save response')
         }
         
         return true
@@ -120,8 +120,11 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setResult(data)
       
-      // Save to local database - AWAIT DIPERBAIKI
+      // Save to database - backend response akan langsung update state
       const saved = await saveToDatabase(data)
+      
+      // PERBAIKAN: Hapus loadDatabaseStats() karena sudah di-update di saveToDatabase
+      // await loadDatabaseStats() // DIHAPUS
       
       toast({
         title: 'Analysis Complete',
@@ -175,21 +178,29 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setBatchResults(data.results)
       
-      // Save each result to database SEQUENTIALLY - PERBAIKAN
+      // Save each result to database SEQUENTIALLY
       let savedCount = 0
       const successfulResults = data.results.filter(result => result.status === 'success')
       
       console.log(`💾 Saving ${successfulResults.length} batch results...`)
       
-      for (const result of successfulResults) {
+      for (let i = 0; i < successfulResults.length; i++) {
+        const result = successfulResults[i]
         const saved = await saveToDatabase(result)
         if (saved) {
           savedCount++
           console.log(`✅ Saved ${savedCount}/${successfulResults.length}`)
+          
+          // PERBAIKAN: Update progress di UI untuk batch save
+          // Hanya reload stats di akhir, bukan setiap save
         }
         // Small delay to prevent overwhelming the database
         await new Promise(resolve => setTimeout(resolve, 100))
       }
+
+      // PERBAIKAN: Reload stats sekali saja di akhir batch
+      console.log('🔄 Final stats reload after batch save complete')
+      await loadDatabaseStats()
 
       console.log(`🎉 Batch save complete: ${savedCount} items saved`)
 
