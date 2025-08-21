@@ -506,12 +506,12 @@ function App() {
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-10 h-10 bg-gray-900 rounded-lg flex items-center justify-center">
                     <img 
-                      src="/src/assets/brin-logo.png" 
-                      alt="BRIN Logo" 
+                      src="/brin-logo.png" 
+                      alt="Logo" 
                       className="w-12 h-12 object-contain"
                       onError={(e) => {
                         e.target.style.display = 'none';
-                        e.target.nextElementSibling.style.display = 'flex';
+                        e.target.nextElementSibling && (e.target.nextElementSibling.style.display = 'flex');
                       }}
                     />
                   </div>

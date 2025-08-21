@@ -24,12 +24,12 @@ function BrinHeader({ onNavigate, activeSection }) {
             <div className="flex items-center">
               <div className="w-12 h-12 flex items-center justify-center">
                 <img 
-                  src="/src/assets/brin-logo.png" 
-                  alt="BRIN Logo" 
+                  src="/brin-logo.png" 
+                  alt="Logo" 
                   className="w-12 h-12 object-contain"
                   onError={(e) => {
                     e.target.style.display = 'none';
-                    e.target.nextElementSibling.style.display = 'flex';
+                    e.target.nextElementSibling && (e.target.nextElementSibling.style.display = 'flex');
                   }}
                 />
       
