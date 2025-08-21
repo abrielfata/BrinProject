@@ -571,7 +571,7 @@ function App() {
 
             <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
               <div className="text-sm text-gray-400">
-                © 2024 BRIN (Badan Riset dan Inovasi Nasional). All rights reserved.
+                © 2025 BRIN (Badan Riset dan Inovasi Nasional). All rights reserved.
               </div>
               <div className="flex items-center space-x-4 mt-4 md:mt-0">
                 <span className="text-xs text-gray-500">Powered by</span>
