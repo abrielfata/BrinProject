@@ -49,9 +49,11 @@ export default function SentimentAnalyzer() {
 
       if (response.ok) {
         const saveResult = await response.json()
-        console.log('✅ Data saved to database:', saveResult.data.id)
-        // Reload stats after saving
-        loadDatabaseStats()
+        console.log('✅ Data saved to database:', saveResult.data?.id)
+        
+        // Immediately reload stats after successful save - PERBAIKAN UTAMA
+        await loadDatabaseStats()
+        
         return true
       }
     } catch (error) {
@@ -91,7 +93,7 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setResult(data)
       
-      // Save to local database
+      // Save to local database - AWAIT DIPERBAIKI
       const saved = await saveToDatabase(data)
       
       toast({
@@ -146,13 +148,18 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setBatchResults(data.results)
       
-      // Save each result to database
+      // Save each result to database - PERBAIKAN BATCH SAVE
       let savedCount = 0
-      for (const result of data.results) {
-        if (result.status === 'success') {
-          const saved = await saveToDatabase(result)
-          if (saved) savedCount++
-        }
+      const successfulResults = data.results.filter(result => result.status === 'success')
+      
+      for (const result of successfulResults) {
+        const saved = await saveToDatabase(result)
+        if (saved) savedCount++
+      }
+
+      // Final stats reload after all saves - PERBAIKAN FINAL RELOAD
+      if (savedCount > 0) {
+        await loadDatabaseStats()
       }
 
       toast({
@@ -186,8 +193,13 @@ export default function SentimentAnalyzer() {
       })
 
       if (response.ok) {
+        // Immediately clear local state - PERBAIKAN CLEAR
         setDatabaseStats(null)
         setRecentEntries([])
+        
+        // Reload fresh stats
+        await loadDatabaseStats()
+        
         toast({
           title: 'Database Cleared',
           description: 'All sentiment data has been removed from the database',
@@ -281,7 +293,9 @@ export default function SentimentAnalyzer() {
     const sentimentCounts = { positive: 0, negative: 0, neutral: 0 }
     
     results.forEach(result => {
-      sentimentCounts[result.predicted_class] = (sentimentCounts[result.predicted_class] || 0) + 1
+      if (result.predicted_class) {
+        sentimentCounts[result.predicted_class] = (sentimentCounts[result.predicted_class] || 0) + 1
+      }
     })
     
     const total = results.length
