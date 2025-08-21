@@ -26,11 +26,16 @@ export default function SentimentAnalyzer() {
 
   const loadDatabaseStats = async () => {
     try {
+      console.log('📡 Loading database stats...')
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sentiment-stats`)
       if (response.ok) {
         const data = await response.json()
+        console.log('📊 Stats loaded:', data)
         setDatabaseStats(data)
         setRecentEntries(data.recent_entries || [])
+        console.log('✅ State updated with new data')
+      } else {
+        console.error('❌ Failed to load stats:', response.status)
       }
     } catch (error) {
       console.error('Error loading database stats:', error)
@@ -39,6 +44,8 @@ export default function SentimentAnalyzer() {
 
   const saveToDatabase = async (sentimentData) => {
     try {
+      console.log('💾 Saving to database...', sentimentData.text?.substring(0, 50) + '...')
+      
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/save-sentiment`, {
         method: 'POST',
         headers: {
@@ -51,10 +58,30 @@ export default function SentimentAnalyzer() {
         const saveResult = await response.json()
         console.log('✅ Data saved to database:', saveResult.data?.id)
         
-        // Immediately reload stats after successful save - PERBAIKAN UTAMA
-        await loadDatabaseStats()
+        // PERBAIKAN UTAMA: Update state langsung dari backend response
+        if (saveResult.current_stats && saveResult.chart_data && saveResult.recent_entries) {
+          console.log('📊 Updating stats from backend response')
+          
+          const updatedStats = {
+            success: true,
+            statistics: saveResult.current_stats,
+            chart_data: saveResult.chart_data,
+            recent_entries: saveResult.recent_entries,
+            database_info: {
+              total_entries: saveResult.current_stats.reduce((sum, stat) => sum + stat.count, 0),
+              last_updated: saveResult.timestamp || new Date().toISOString(),
+              database_type: 'PostgreSQL'
+            }
+          }
+          
+          setDatabaseStats(updatedStats)
+          setRecentEntries(saveResult.recent_entries)
+          console.log('✅ State updated with fresh data')
+        }
         
         return true
+      } else {
+        console.error('❌ Save failed:', response.status)
       }
     } catch (error) {
       console.error('Error saving to database:', error)
@@ -148,19 +175,23 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setBatchResults(data.results)
       
-      // Save each result to database - PERBAIKAN BATCH SAVE
+      // Save each result to database SEQUENTIALLY - PERBAIKAN
       let savedCount = 0
       const successfulResults = data.results.filter(result => result.status === 'success')
       
+      console.log(`💾 Saving ${successfulResults.length} batch results...`)
+      
       for (const result of successfulResults) {
         const saved = await saveToDatabase(result)
-        if (saved) savedCount++
+        if (saved) {
+          savedCount++
+          console.log(`✅ Saved ${savedCount}/${successfulResults.length}`)
+        }
+        // Small delay to prevent overwhelming the database
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
 
-      // Final stats reload after all saves - PERBAIKAN FINAL RELOAD
-      if (savedCount > 0) {
-        await loadDatabaseStats()
-      }
+      console.log(`🎉 Batch save complete: ${savedCount} items saved`)
 
       toast({
         title: 'Batch Analysis Complete',

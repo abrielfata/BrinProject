@@ -72,6 +72,8 @@ app.post('/api/save-sentiment', async (req, res) => {
       });
     }
     
+    console.log('💾 Inserting sentiment data:', { text: text.substring(0, 50) + '...', predicted_class });
+    
     // PERBAIKAN: AWAIT insertSentimentAnalysis
     const result = await insertSentimentAnalysis({
       text,
@@ -82,20 +84,32 @@ app.post('/api/save-sentiment', async (req, res) => {
     });
     
     if (result.success) {
-      // PERBAIKAN: AWAIT Promise.all untuk stats
-      const [stats, chartData] = await Promise.all([
+      console.log('✅ Data inserted with ID:', result.id);
+      
+      // PERBAIKAN: AWAIT Promise.all untuk stats dan sertakan recent entries
+      const [stats, chartData, recentEntries] = await Promise.all([
         getSentimentStats(),
-        getChartData()
+        getChartData(),
+        getRecentEntries(5)
       ]);
+      
+      console.log('📊 Fresh stats generated:', { 
+        statsCount: stats.length, 
+        chartDataCount: chartData.length,
+        recentCount: recentEntries.length 
+      });
       
       res.json({
         success: true,
         message: 'Sentiment analysis saved successfully',
         data: result.data,
         current_stats: stats,
-        chart_data: chartData
+        chart_data: chartData,
+        recent_entries: recentEntries,
+        timestamp: new Date().toISOString()
       });
     } else {
+      console.error('❌ Insert failed:', result.error);
       res.status(500).json({
         success: false,
         error: result.error
@@ -253,7 +267,7 @@ app.post('/api/batch_predict', async (req, res) => {
   }
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error('Unhandled error:', err);
   res.status(500).json({
     success: false,
