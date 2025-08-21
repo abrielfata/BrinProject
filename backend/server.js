@@ -72,7 +72,8 @@ app.post('/api/save-sentiment', async (req, res) => {
       });
     }
     
-    const result = insertSentimentAnalysis({
+    // PERBAIKAN: AWAIT insertSentimentAnalysis
+    const result = await insertSentimentAnalysis({
       text,
       predicted_class,
       confidence,
@@ -81,6 +82,7 @@ app.post('/api/save-sentiment', async (req, res) => {
     });
     
     if (result.success) {
+      // PERBAIKAN: AWAIT Promise.all untuk stats
       const [stats, chartData] = await Promise.all([
         getSentimentStats(),
         getChartData()
@@ -251,7 +253,7 @@ app.post('/api/batch_predict', async (req, res) => {
   }
 });
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({
     success: false,
