@@ -511,7 +511,9 @@ function App() {
                       className="w-12 h-12 object-contain"
                       onError={(e) => {
                         e.target.style.display = 'none';
-                        e.target.nextElementSibling && (e.target.nextElementSibling.style.display = 'flex');
+                        if (e.target.nextElementSibling) {
+                          e.target.nextElementSibling.style.display = 'flex';
+                        }
                       }}
                     />
                   </div>
