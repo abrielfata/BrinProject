@@ -14,7 +14,6 @@ import {
   getRecentEntries,
   getDatabaseInfo,
   initializeDatabase,
-  clearAllData
 } from './postgresDB.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -183,32 +182,6 @@ app.get('/api/chart-data', async (req, res) => {
   }
 });
 
-app.delete('/api/clear-data', async (req, res) => {
-  try {
-    const result = await clearAllData();
-    
-    if (result.success) {
-      
-      res.json({
-        success: true,
-        message: 'All sentiment data cleared successfully'
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: result.error || 'Failed to clear data'
-      });
-    }
-    
-  } catch (error) {
-    console.error('Error clearing data:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to clear data'
-    });
-  }
-});
-
 // Proxy endpoints for ML API to avoid CORS issues
 app.post('/api/predict', async (req, res) => {
   try {
@@ -299,7 +272,6 @@ app.listen(PORT, () => {
   console.log(`   GET  http://localhost:${PORT}/api/sentiment-data`);
   console.log(`   GET  http://localhost:${PORT}/api/sentiment-stats`);
   console.log(`   GET  http://localhost:${PORT}/api/chart-data`);
-  console.log(`   DEL  http://localhost:${PORT}/api/clear-data`);
   console.log(`   POST http://localhost:${PORT}/api/predict`);
   console.log(`   POST http://localhost:${PORT}/api/batch_predict`);
   console.log('\n💡 Ready to receive sentiment analysis data!');

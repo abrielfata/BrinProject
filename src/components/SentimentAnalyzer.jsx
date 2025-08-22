@@ -372,6 +372,9 @@ export default function SentimentAnalyzer() {
             <h1 className="text-3xl font-bold text-gray-900">Sentiment Analyzer</h1>
           </div>
           <p className="text-gray-600">Analyze the emotional tone of your text using AI</p>
+          <p className="text-xs text-red-500 mt-1">
+            <strong>Note:</strong> Please input your comment in <span className="underline">English</span>.
+          </p>
         </div>
 
         {/* Database Statistics Card */}
@@ -381,15 +384,6 @@ export default function SentimentAnalyzer() {
               <CardTitle className="flex items-center gap-2 text-gray-900">
                 <Database className="h-5 w-5 text-red-600" />
                 Database Statistics
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={clearDatabase}
-                  className="ml-auto text-red-600 border-red-200 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Clear Data
-                </Button>
               </CardTitle>
               <CardDescription>
                 Total entries: {databaseStats.database_info?.total_entries || 0} | 
