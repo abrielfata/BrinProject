@@ -19,7 +19,10 @@ export default function SentimentAnalyzer() {
   const [recentEntries, setRecentEntries] = useState([])
   const [lastRequestTime, setLastRequestTime] = useState(0)
   const { toast } = useToast()
-  
+
+  // Simple refresh approach - no Socket.IO complexity needed
+
+  // Load database statistics when component mounts
   useEffect(() => {
     loadDatabaseStats()
   }, [])

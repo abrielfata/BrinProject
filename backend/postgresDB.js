@@ -184,14 +184,8 @@ export async function getSentimentStats() {
   }
 }
 
-// PERBAIKAN: Pastikan getChartData adalah async dan mengembalikan promise yang benar
-export async function getChartData() {
-  if (!pool) {
-    return [];
-  }
-  
-  try {
-    const stats = await getSentimentStats();
+export function getChartData() {
+  return getSentimentStats().then(stats => {
     return stats.map(stat => ({
       name: stat.predicted_class.charAt(0).toUpperCase() + stat.predicted_class.slice(1),
       value: stat.percentage,
@@ -199,10 +193,10 @@ export async function getChartData() {
       avgConfidence: stat.avg_confidence,
       color: getSentimentColor(stat.predicted_class)
     }));
-  } catch (error) {
+  }).catch(error => {
     console.error('❌ Error getting chart data:', error);
     return [];
-  }
+  });
 }
 
 export function getSentimentColor(sentiment) {
@@ -283,7 +277,8 @@ export async function clearAllData() {
   try {
     const query = 'DELETE FROM sentiment_analysis';
     await pool.query(query);
-  
+    
+    // All sentiment data cleared successfully
     return { success: true, message: 'All data cleared successfully' };
     
   } catch (error) {
@@ -326,10 +321,11 @@ async function getDatabaseStats() {
   }
 }
 
+// Graceful shutdown
 process.on('SIGINT', async () => {
-  if (pool) {
-    await pool.end();
-  }
+  // Closing PostgreSQL connections
+  await pool.end();
+  // PostgreSQL connections closed
   process.exit(0);
 });
 
