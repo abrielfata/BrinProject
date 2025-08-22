@@ -114,6 +114,9 @@ export default function SentimentAnalyzer() {
       // Refresh database stats after successful analysis
       await loadDatabaseStats()
       
+      // Kosongkan input setelah analisis berhasil
+      setText('')
+
       toast({
         title: 'Analysis Complete',
         description: `Sentiment: ${data.predicted_class} (${(data.confidence * 100).toFixed(1)}% confidence)${saved ? ' - Saved to database' : ''}`,
@@ -181,6 +184,9 @@ export default function SentimentAnalyzer() {
       // Refresh database stats after successful batch analysis
       await loadDatabaseStats()
 
+      // Kosongkan input batch setelah analisis berhasil
+      setBatchTexts('')
+
       toast({
         title: 'Batch Analysis Complete',
         description: `Analyzed ${data.total_processed} texts, saved ${savedCount} to database`,
@@ -200,37 +206,7 @@ export default function SentimentAnalyzer() {
       setLoading(false)
     }
   }
-
-  const clearDatabase = async () => {
-    if (!confirm('Are you sure you want to clear all database records? This action cannot be undone.')) {
-      return
-    }
-
-    try {
-      const apiUrl = import.meta.env.VITE_API_URL || '/api'
-      const response = await fetch(`${apiUrl}/api/clear-data`, {
-        method: 'DELETE'
-      })
-
-      if (response.ok) {
-        // Refresh database stats after clearing
-        await loadDatabaseStats()
-        
-        toast({
-          title: 'Database Cleared',
-          description: 'All sentiment data has been removed from the database',
-        })
-      }
-    } catch (error) {
-      console.error('Error clearing database:', error)
-      toast({
-        title: 'Error',
-        description: 'Failed to clear database',
-        variant: 'destructive',
-      })
-    }
-  }
-
+  
   const getSentimentIcon = (sentiment) => {
     switch (sentiment) {
       case 'positive':
