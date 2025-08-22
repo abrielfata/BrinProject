@@ -493,7 +493,7 @@ function App() {
               </div>
             </div>
             <div className="max-w-4xl mx-auto px-4">
-              <SentimentAnalyzer />
+              <SentimentAnalyzer apiUrl="https://brinproject.onrender.com" />
             </div>
           </div>
         </section>
