@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from './ui/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/Card'
 import { Textarea } from './ui/Textarea'
@@ -17,25 +17,21 @@ export default function SentimentAnalyzer() {
   const [activeTab, setActiveTab] = useState('single')
   const [databaseStats, setDatabaseStats] = useState(null)
   const [recentEntries, setRecentEntries] = useState([])
+  const [lastRequestTime, setLastRequestTime] = useState(0)
   const { toast } = useToast()
-
-  // Load database statistics when component mounts
+  
   useEffect(() => {
     loadDatabaseStats()
   }, [])
 
   const loadDatabaseStats = async () => {
     try {
-      console.log('📡 Loading database stats...')
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/sentiment-stats`)
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/api/sentiment-stats`)
       if (response.ok) {
         const data = await response.json()
-        console.log('📊 Stats loaded:', data)
         setDatabaseStats(data)
         setRecentEntries(data.recent_entries || [])
-        console.log('✅ State updated with new data')
-      } else {
-        console.error('❌ Failed to load stats:', response.status)
       }
     } catch (error) {
       console.error('Error loading database stats:', error)
@@ -44,9 +40,8 @@ export default function SentimentAnalyzer() {
 
   const saveToDatabase = async (sentimentData) => {
     try {
-      console.log('💾 Saving to database...', sentimentData.text?.substring(0, 50) + '...')
-      
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/save-sentiment`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/api/save-sentiment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,32 +51,9 @@ export default function SentimentAnalyzer() {
 
       if (response.ok) {
         const saveResult = await response.json()
-        console.log('✅ Data saved to database:', saveResult.data?.id)
-        
-        // PERBAIKAN UTAMA: Update state langsung dari backend response
-        if (saveResult.current_stats && saveResult.chart_data && saveResult.recent_entries) {
-          console.log('📊 Updating stats from backend response')
-          
-          const updatedStats = {
-            success: true,
-            statistics: saveResult.current_stats,
-            chart_data: saveResult.chart_data,
-            recent_entries: saveResult.recent_entries,
-            database_info: {
-              total_entries: saveResult.current_stats.reduce((sum, stat) => sum + stat.count, 0),
-              last_updated: saveResult.timestamp || new Date().toISOString(),
-              database_type: 'PostgreSQL'
-            }
-          }
-          
-          setDatabaseStats(updatedStats)
-          setRecentEntries(saveResult.recent_entries)
-          console.log('✅ State updated with fresh data from save response')
-        }
-        
+        console.log('✅ Data saved to database:', saveResult.data.id)
+        // Real-time update will be handled by Socket.IO
         return true
-      } else {
-        console.error('❌ Save failed:', response.status)
       }
     } catch (error) {
       console.error('Error saving to database:', error)
@@ -99,16 +71,29 @@ export default function SentimentAnalyzer() {
       return
     }
 
+    // Rate limiting: prevent requests within 2 seconds of each other
+    const now = Date.now()
+    if (now - lastRequestTime < 2000) {
+      toast({
+        title: 'Please wait',
+        description: 'Please wait a moment before making another request',
+        variant: 'destructive',
+      })
+      return
+    }
+    setLastRequestTime(now)
+
     setLoading(true)
     try {
       // Call sentiment API via backend proxy
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/predict`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/api/predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          text: text.trim(),
+          text: text.trim().replace(/\\/g, ''), // Remove any backslashes that might cause escape issues
         }),
       })
 
@@ -120,11 +105,11 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setResult(data)
       
-      // Save to database - backend response akan langsung update state
+      // Save to local database
       const saved = await saveToDatabase(data)
       
-      // PERBAIKAN: Hapus loadDatabaseStats() karena sudah di-update di saveToDatabase
-      // await loadDatabaseStats() // DIHAPUS
+      // Refresh database stats after successful analysis
+      await loadDatabaseStats()
       
       toast({
         title: 'Analysis Complete',
@@ -147,7 +132,9 @@ export default function SentimentAnalyzer() {
   }
 
   const analyzeBatch = async () => {
-    const texts = batchTexts.split('\n').filter((t) => t.trim())
+    const texts = batchTexts.split('\n')
+      .filter((t) => t.trim())
+      .map(t => t.trim().replace(/\\/g, '')) // Remove backslashes from each text
     if (texts.length === 0) {
       toast({
         title: 'Error',
@@ -160,7 +147,8 @@ export default function SentimentAnalyzer() {
     setLoading(true)
     try {
       // Call batch API via backend proxy
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/batch_predict`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/api/batch_predict`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,31 +166,17 @@ export default function SentimentAnalyzer() {
       const data = await response.json()
       setBatchResults(data.results)
       
-      // Save each result to database SEQUENTIALLY
+      // Save each result to database
       let savedCount = 0
-      const successfulResults = data.results.filter(result => result.status === 'success')
-      
-      console.log(`💾 Saving ${successfulResults.length} batch results...`)
-      
-      for (let i = 0; i < successfulResults.length; i++) {
-        const result = successfulResults[i]
-        const saved = await saveToDatabase(result)
-        if (saved) {
-          savedCount++
-          console.log(`✅ Saved ${savedCount}/${successfulResults.length}`)
-          
-          // PERBAIKAN: Update progress di UI untuk batch save
-          // Hanya reload stats di akhir, bukan setiap save
+      for (const result of data.results) {
+        if (result.status === 'success') {
+          const saved = await saveToDatabase(result)
+          if (saved) savedCount++
         }
-        // Small delay to prevent overwhelming the database
-        await new Promise(resolve => setTimeout(resolve, 100))
       }
 
-      // PERBAIKAN: Reload stats sekali saja di akhir batch
-      console.log('🔄 Final stats reload after batch save complete')
+      // Refresh database stats after successful batch analysis
       await loadDatabaseStats()
-
-      console.log(`🎉 Batch save complete: ${savedCount} items saved`)
 
       toast({
         title: 'Batch Analysis Complete',
@@ -230,16 +204,13 @@ export default function SentimentAnalyzer() {
     }
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/clear-data`, {
+      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      const response = await fetch(`${apiUrl}/api/clear-data`, {
         method: 'DELETE'
       })
 
       if (response.ok) {
-        // Immediately clear local state - PERBAIKAN CLEAR
-        setDatabaseStats(null)
-        setRecentEntries([])
-        
-        // Reload fresh stats
+        // Refresh database stats after clearing
         await loadDatabaseStats()
         
         toast({
@@ -335,9 +306,7 @@ export default function SentimentAnalyzer() {
     const sentimentCounts = { positive: 0, negative: 0, neutral: 0 }
     
     results.forEach(result => {
-      if (result.predicted_class) {
-        sentimentCounts[result.predicted_class] = (sentimentCounts[result.predicted_class] || 0) + 1
-      }
+      sentimentCounts[result.predicted_class] = (sentimentCounts[result.predicted_class] || 0) + 1
     })
     
     const total = results.length

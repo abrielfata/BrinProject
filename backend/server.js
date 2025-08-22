@@ -24,9 +24,12 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 app.use(cors({
-  origin: "https://brin-project-kp.vercel.app", // allow your frontend
-  methods: ["GET", "POST"], // adjust as needed
-  credentials: true // if you're using cookies or auth headers
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://brin-six.vercel.app'] // Your actual Vercel URL
+    : ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
@@ -76,10 +79,7 @@ app.post('/api/save-sentiment', async (req, res) => {
       });
     }
     
-    console.log('💾 Inserting sentiment data:', { text: text.substring(0, 50) + '...', predicted_class });
-    
-    // PERBAIKAN: AWAIT insertSentimentAnalysis
-    const result = await insertSentimentAnalysis({
+    const result = insertSentimentAnalysis({
       text,
       predicted_class,
       confidence,
@@ -88,32 +88,20 @@ app.post('/api/save-sentiment', async (req, res) => {
     });
     
     if (result.success) {
-      console.log('✅ Data inserted with ID:', result.id);
-      
-      // PERBAIKAN: AWAIT Promise.all untuk stats dan sertakan recent entries
-      const [stats, chartData, recentEntries] = await Promise.all([
+      const [stats, chartData] = await Promise.all([
         getSentimentStats(),
-        getChartData(),
-        getRecentEntries(5)
+        getChartData()
       ]);
       
-      console.log('📊 Fresh stats generated:', { 
-        statsCount: stats.length, 
-        chartDataCount: chartData.length,
-        recentCount: recentEntries.length 
-      });
       
       res.json({
         success: true,
         message: 'Sentiment analysis saved successfully',
         data: result.data,
         current_stats: stats,
-        chart_data: chartData,
-        recent_entries: recentEntries,
-        timestamp: new Date().toISOString()
+        chart_data: chartData
       });
     } else {
-      console.error('❌ Insert failed:', result.error);
       res.status(500).json({
         success: false,
         error: result.error
@@ -200,6 +188,7 @@ app.delete('/api/clear-data', async (req, res) => {
     const result = await clearAllData();
     
     if (result.success) {
+      
       res.json({
         success: true,
         message: 'All sentiment data cleared successfully'
@@ -232,7 +221,15 @@ app.post('/api/predict', async (req, res) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      const responseClone = response.clone();
+      try {
+        errorData = await response.json();
+      } catch (parseError) {
+        // Handle non-JSON responses (like "Too Many Requests" plain text)
+        const textData = await responseClone.text();
+        errorData = { error: textData || 'Unknown error occurred' };
+      }
       return res.status(response.status).json(errorData);
     }
 
@@ -257,7 +254,15 @@ app.post('/api/batch_predict', async (req, res) => {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      let errorData;
+      const responseClone = response.clone();
+      try {
+        errorData = await response.json();
+      } catch (parseError) {
+        // Handle non-JSON responses (like "Too Many Requests" plain text)
+        const textData = await responseClone.text();
+        errorData = { error: textData || 'Unknown error occurred' };
+      }
       return res.status(response.status).json(errorData);
     }
 
@@ -271,7 +276,7 @@ app.post('/api/batch_predict', async (req, res) => {
   }
 });
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({
     success: false,
@@ -295,6 +300,8 @@ app.listen(PORT, () => {
   console.log(`   GET  http://localhost:${PORT}/api/sentiment-stats`);
   console.log(`   GET  http://localhost:${PORT}/api/chart-data`);
   console.log(`   DEL  http://localhost:${PORT}/api/clear-data`);
+  console.log(`   POST http://localhost:${PORT}/api/predict`);
+  console.log(`   POST http://localhost:${PORT}/api/batch_predict`);
   console.log('\n💡 Ready to receive sentiment analysis data!');
 });
 
