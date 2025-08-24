@@ -617,7 +617,7 @@ Lane assist feature is helpful`}
 
         {/* Footer */}
         <div className="text-center text-sm text-gray-500">
-          <p>Powered by BRIN Deep Learning Model • Data saved to local database</p>
+          <p>Powered by BRIN Deep Learning Model</p>
         </div>
       </div>
     </div>
