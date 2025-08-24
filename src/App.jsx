@@ -9,6 +9,14 @@ function App() {
 
   const handleNavigation = (sectionId) => {
     setActiveSection(sectionId);
+    // Tambahan: jika sectionId adalah 'about', scroll ke footer
+    if (sectionId === 'about') {
+      const footer = document.getElementById('footer');
+      if (footer) {
+        footer.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
     const element = document.getElementById(sectionId);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -498,7 +506,7 @@ function App() {
           </div>
         </section>
 
-        <footer className="bg-gray-900 text-white">
+        <footer id="footer" className="bg-gray-900 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div className="grid md:grid-cols-4 gap-8">
               {/* BRIN Info */}
