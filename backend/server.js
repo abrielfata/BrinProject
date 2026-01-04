@@ -79,7 +79,7 @@ app.post('/api/save-sentiment', async (req, res) => {
       });
     }
     
-    const result = insertSentimentAnalysis({
+    const result = await insertSentimentAnalysis({
       text,
       predicted_class,
       confidence,
