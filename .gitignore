@@ -139,3 +139,12 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
 brin-api/
+
+# Abaikan semua file Word
+*.docx
+
+# Abaikan semua file Zip
+*.zip
+
+# Abaikan folder spesifik
+Contoh File Laporan Kerja Praktek/
