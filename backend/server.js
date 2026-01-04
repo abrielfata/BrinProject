@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://brin-six.vercel.app'] // Your actual Vercel URL
+    ? ['https://brin-six.vercel.app', 'https://brin-project-160q4ttd4-fates-projects-6b260efc.vercel.app'] 
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -39,7 +39,7 @@ app.use(express.json());
     await initializeDatabase();
   } catch (error) {
     console.error('❌ Failed to initialize database:', error);
-    process.exit(1);
+    // Don't exit - allow app to run without database
   }
 })();
 
@@ -70,15 +70,20 @@ app.get('/api/health', async (req, res) => {
 
 app.post('/api/save-sentiment', async (req, res) => {
   try {
+    console.log('📥 Received save-sentiment request:', req.body);
+    
     const { text, predicted_class, confidence, all_probabilities } = req.body;
     
+    // Validate required fields
     if (!text || !predicted_class || !confidence || !all_probabilities) {
+      console.error('❌ Missing required fields');
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: text, predicted_class, confidence, all_probabilities'
       });
     }
     
+    // Call insertSentimentAnalysis with await
     const result = await insertSentimentAnalysis({
       text,
       predicted_class,
@@ -87,13 +92,15 @@ app.post('/api/save-sentiment', async (req, res) => {
       source: 'web_analyzer'
     });
     
+    console.log('💾 Insert result:', result);
+    
     if (result.success) {
       const [stats, chartData] = await Promise.all([
         getSentimentStats(),
         getChartData()
       ]);
       
-      
+      console.log('✅ Sentiment saved successfully');
       res.json({
         success: true,
         message: 'Sentiment analysis saved successfully',
@@ -102,17 +109,18 @@ app.post('/api/save-sentiment', async (req, res) => {
         chart_data: chartData
       });
     } else {
+      console.error('❌ Insert failed:', result.error);
       res.status(500).json({
         success: false,
-        error: result.error
+        error: result.error || 'Failed to save sentiment analysis'
       });
     }
     
   } catch (error) {
-    console.error('Error saving sentiment:', error);
+    console.error('❌ Error saving sentiment:', error);
     res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error: ' + error.message
     });
   }
 });
@@ -133,7 +141,7 @@ app.get('/api/sentiment-data', async (req, res) => {
     console.error('Error getting sentiment data:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to retrieve sentiment data'
+      error: 'Failed to retrieve sentiment data: ' + error.message
     });
   }
 });
@@ -162,7 +170,7 @@ app.get('/api/sentiment-stats', async (req, res) => {
     console.error('Error getting sentiment stats:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to retrieve sentiment statistics'
+      error: 'Failed to retrieve sentiment statistics: ' + error.message
     });
   }
 });
@@ -178,7 +186,7 @@ app.get('/api/chart-data', async (req, res) => {
     console.error('Error getting chart data:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to retrieve chart data'
+      error: 'Failed to retrieve chart data: ' + error.message
     });
   }
 });
@@ -188,7 +196,6 @@ app.delete('/api/clear-data', async (req, res) => {
     const result = await clearAllData();
     
     if (result.success) {
-      
       res.json({
         success: true,
         message: 'All sentiment data cleared successfully'
@@ -204,7 +211,7 @@ app.delete('/api/clear-data', async (req, res) => {
     console.error('Error clearing data:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to clear data'
+      error: 'Failed to clear data: ' + error.message
     });
   }
 });
@@ -226,7 +233,6 @@ app.post('/api/predict', async (req, res) => {
       try {
         errorData = await response.json();
       } catch (parseError) {
-        // Handle non-JSON responses (like "Too Many Requests" plain text)
         const textData = await responseClone.text();
         errorData = { error: textData || 'Unknown error occurred' };
       }
@@ -238,7 +244,7 @@ app.post('/api/predict', async (req, res) => {
   } catch (error) {
     console.error('ML API predict error:', error);
     res.status(500).json({
-      error: 'Failed to connect to ML API'
+      error: 'Failed to connect to ML API: ' + error.message
     });
   }
 });
@@ -259,7 +265,6 @@ app.post('/api/batch_predict', async (req, res) => {
       try {
         errorData = await response.json();
       } catch (parseError) {
-        // Handle non-JSON responses (like "Too Many Requests" plain text)
         const textData = await responseClone.text();
         errorData = { error: textData || 'Unknown error occurred' };
       }
@@ -271,7 +276,7 @@ app.post('/api/batch_predict', async (req, res) => {
   } catch (error) {
     console.error('ML API batch_predict error:', error);
     res.status(500).json({
-      error: 'Failed to connect to ML API'
+      error: 'Failed to connect to ML API: ' + error.message
     });
   }
 });
@@ -280,7 +285,7 @@ app.use((err, req, res, next) => {
   console.error('Unhandled error:', err);
   res.status(500).json({
     success: false,
-    error: 'Internal server error'
+    error: 'Internal server error: ' + err.message
   });
 });
 
