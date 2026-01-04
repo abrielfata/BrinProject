@@ -1,311 +1,332 @@
-import express from 'express';
-import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
+import pg from 'pg';
+const { Pool } = pg;
 
-// Load environment variables
-dotenv.config();
-import {
-  insertSentimentAnalysis,
-  getAllSentimentData,
-  getSentimentStats,
-  getChartData,
-  getRecentEntries,
-  getDatabaseInfo,
-  initializeDatabase,
-  clearAllData
-} from './postgresDB.js';
+// Database connection configuration
+let pool = null;
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+if (process.env.DATABASE_URL) {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
+  });
+} else {
+  console.error('DATABASE_URL not found. PostgreSQL features disabled.');
+}
 
-const app = express();
-const PORT = process.env.PORT || 3001;
-
-app.use(cors({
-  origin: true,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-app.use(express.json());
-
-// Initialize PostgreSQL database
-(async () => {
-  try {
-    await initializeDatabase();
-  } catch (error) {
-    console.error('❌ Failed to initialize database:', error);
-    // Don't exit - allow app to run without database
+// Test database connection
+async function testConnection() {
+  if (!pool) {
+    return false;
   }
-})();
-
-app.get('/api/health', async (req, res) => {
+  
   try {
-    const dbInfo = await getDatabaseInfo();
-    res.json({
-      status: 'OK',
-      message: 'Database API is running',
-      database: {
-        total_entries: dbInfo?.total_entries || 0,
-        database_type: dbInfo?.database_type || 'PostgreSQL',
-        connection_status: dbInfo?.connection_status || 'unknown',
-        last_updated: dbInfo?.last_updated
-      },
-      timestamp: new Date().toISOString()
-    });
+    const client = await pool.connect();
+    // PostgreSQL connected successfully
+    client.release();
+    return true;
   } catch (error) {
-    console.error('Health check error:', error);
-    res.status(500).json({
-      status: 'ERROR',
-      message: 'Database connection failed',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
+    console.error('❌ PostgreSQL connection failed:', error.message);
+    return false;
   }
-});
+}
 
-app.post('/api/save-sentiment', async (req, res) => {
+export async function initializeDatabase() {
+  // Initializing PostgreSQL Database
+  
+  if (!pool) {
+    // PostgreSQL not configured - using fallback mode
+    return {
+      total_entries: 0,
+      last_updated: null,
+      status: 'fallback_mode'
+    };
+  }
+  
+  const isConnected = await testConnection();
+  if (!isConnected) {
+    // PostgreSQL connection failed - using fallback mode
+    return {
+      total_entries: 0,
+      last_updated: null,
+      status: 'connection_failed'
+    };
+  }
+
   try {
-    console.log('📥 Received save-sentiment request:', req.body);
+    // Get database stats
+    const stats = await getDatabaseStats();
+    // Database initialized successfully
     
-    const { text, predicted_class, confidence, all_probabilities } = req.body;
+    return stats;
+  } catch (error) {
+    console.error('❌ Error initializing database:', error);
+    // Using fallback mode
+    return {
+      total_entries: 0,
+      last_updated: null,
+      status: 'error'
+    };
+  }
+}
+
+export async function insertSentimentAnalysis(analysisData) {
+  if (!pool) {
+    return { success: false, error: 'PostgreSQL not configured' };
+  }
+  
+  try {
+    const query = `
+      INSERT INTO sentiment_analysis (
+        text, predicted_class, confidence, 
+        positive_prob, negative_prob, neutral_prob, source
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+    `;
     
-    // Validate required fields
-    if (!text || !predicted_class || !confidence || !all_probabilities) {
-      console.error('❌ Missing required fields');
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: text, predicted_class, confidence, all_probabilities'
-      });
-    }
+    const values = [
+      analysisData.text,
+      analysisData.predicted_class,
+      analysisData.confidence,
+      analysisData.all_probabilities.positive,
+      analysisData.all_probabilities.negative,
+      analysisData.all_probabilities.neutral,
+      analysisData.source || 'web_analyzer'
+    ];
+
+    const result = await pool.query(query, values);
+    const newEntry = result.rows[0];
     
-    // Call insertSentimentAnalysis with await
-    const result = await insertSentimentAnalysis({
-      text,
-      predicted_class,
-      confidence,
-      all_probabilities,
-      source: 'web_analyzer'
-    });
-    
-    console.log('💾 Insert result:', result);
-    
-    if (result.success) {
-      const [stats, chartData] = await Promise.all([
-        getSentimentStats(),
-        getChartData()
-      ]);
-      
-      console.log('✅ Sentiment saved successfully');
-      res.json({
-        success: true,
-        message: 'Sentiment analysis saved successfully',
-        data: result.data,
-        current_stats: stats,
-        chart_data: chartData
-      });
-    } else {
-      console.error('❌ Insert failed:', result.error);
-      res.status(500).json({
-        success: false,
-        error: result.error || 'Failed to save sentiment analysis'
-      });
-    }
+    // Data inserted successfully
+    return { 
+      success: true, 
+      id: newEntry.id, 
+      data: {
+        ...newEntry,
+        // Convert back to original format for consistency
+        all_probabilities: {
+          positive: newEntry.positive_prob,
+          negative: newEntry.negative_prob,
+          neutral: newEntry.neutral_prob
+        }
+      }
+    };
     
   } catch (error) {
-    console.error('❌ Error saving sentiment:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Internal server error: ' + error.message
-    });
+    console.error('❌ Error inserting data:', error);
+    return { success: false, error: error.message };
   }
-});
+}
 
-app.get('/api/sentiment-data', async (req, res) => {
+export async function getAllSentimentData() {
+  if (!pool) {
+    return [];
+  }
+  
   try {
-    const { limit } = req.query;
-    const allData = await getAllSentimentData();
+    const query = `
+      SELECT id, text, predicted_class, confidence,
+             positive_prob, negative_prob, neutral_prob,
+             source, created_at, updated_at
+      FROM sentiment_analysis 
+      ORDER BY created_at DESC
+    `;
     
-    const data = limit ? allData.slice(0, parseInt(limit)) : allData;
+    const result = await pool.query(query);
     
-    res.json({
-      success: true,
-      data: data,
-      total: allData.length
-    });
+    // Transform data to match original JSON format
+    return result.rows.map(row => ({
+      ...row,
+      all_probabilities: {
+        positive: row.positive_prob,
+        negative: row.negative_prob,
+        neutral: row.neutral_prob
+      }
+    }));
+    
   } catch (error) {
-    console.error('Error getting sentiment data:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to retrieve sentiment data: ' + error.message
-    });
+    console.error('❌ Error getting all data:', error);
+    return [];
   }
-});
+}
 
-app.get('/api/sentiment-stats', async (req, res) => {
+export async function getSentimentStats() {
+  if (!pool) {
+    return [];
+  }
+  
   try {
-    const [stats, chartData, recentEntries, dbInfo] = await Promise.all([
-      getSentimentStats(),
-      getChartData(),
-      getRecentEntries(5),
-      getDatabaseInfo()
+    const query = `
+      SELECT 
+        predicted_class,
+        COUNT(*) as count,
+        AVG(confidence) as avg_confidence,
+        ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM sentiment_analysis)), 2) as percentage
+      FROM sentiment_analysis
+      GROUP BY predicted_class
+      ORDER BY count DESC
+    `;
+    
+    const result = await pool.query(query);
+    
+    return result.rows.map(row => ({
+      predicted_class: row.predicted_class,
+      count: parseInt(row.count),
+      avg_confidence: parseFloat(parseFloat(row.avg_confidence).toFixed(4)),
+      percentage: parseFloat(row.percentage)
+    }));
+    
+  } catch (error) {
+    console.error('❌ Error getting stats:', error);
+    return [];
+  }
+}
+
+export function getChartData() {
+  return getSentimentStats().then(stats => {
+    return stats.map(stat => ({
+      name: stat.predicted_class.charAt(0).toUpperCase() + stat.predicted_class.slice(1),
+      value: stat.percentage,
+      count: stat.count,
+      avgConfidence: stat.avg_confidence,
+      color: getSentimentColor(stat.predicted_class)
+    }));
+  }).catch(error => {
+    console.error('❌ Error getting chart data:', error);
+    return [];
+  });
+}
+
+export function getSentimentColor(sentiment) {
+  const colors = {
+    positive: '#22c55e',
+    negative: '#ef4444',
+    neutral: '#6b7280'
+  };
+  return colors[sentiment] || '#6b7280';
+}
+
+export async function getRecentEntries(limit = 10) {
+  if (!pool) {
+    return [];
+  }
+  
+  try {
+    const query = `
+      SELECT id, text, predicted_class, confidence,
+             positive_prob, negative_prob, neutral_prob,
+             source, created_at
+      FROM sentiment_analysis 
+      ORDER BY created_at DESC 
+      LIMIT $1
+    `;
+    
+    const result = await pool.query(query, [limit]);
+    
+    return result.rows.map(row => ({
+      ...row,
+      all_probabilities: {
+        positive: row.positive_prob,
+        negative: row.negative_prob,
+        neutral: row.neutral_prob
+      }
+    }));
+    
+  } catch (error) {
+    console.error('❌ Error getting recent entries:', error);
+    return [];
+  }
+}
+
+export async function getDatabaseInfo() {
+  if (!pool) {
+    return {
+      total_entries: 0,
+      last_updated: null,
+      database_type: 'PostgreSQL (Not Configured)',
+      connection_status: 'disconnected'
+    };
+  }
+  
+  try {
+    const stats = await getDatabaseStats();
+    return {
+      total_entries: stats.total_entries,
+      last_updated: stats.last_updated,
+      database_type: 'PostgreSQL',
+      connection_status: 'connected'
+    };
+  } catch (error) {
+    console.error('❌ Error getting database info:', error);
+    return {
+      total_entries: 0,
+      last_updated: null,
+      database_type: 'PostgreSQL',
+      connection_status: 'error'
+    };
+  }
+}
+
+export async function clearAllData() {
+  if (!pool) {
+    return { success: false, error: 'PostgreSQL not configured' };
+  }
+  
+  try {
+    const query = 'DELETE FROM sentiment_analysis';
+    await pool.query(query);
+    
+    // All sentiment data cleared successfully
+    return { success: true, message: 'All data cleared successfully' };
+    
+  } catch (error) {
+    console.error('❌ Error clearing data:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function getDatabaseStats() {
+  if (!pool) {
+    return {
+      total_entries: 0,
+      last_updated: null
+    };
+  }
+  
+  try {
+    const countQuery = 'SELECT COUNT(*) as total FROM sentiment_analysis';
+    const lastUpdateQuery = `
+      SELECT MAX(created_at) as last_updated 
+      FROM sentiment_analysis
+    `;
+    
+    const [countResult, updateResult] = await Promise.all([
+      pool.query(countQuery),
+      pool.query(lastUpdateQuery)
     ]);
     
-    res.json({
-      success: true,
-      statistics: stats,
-      chart_data: chartData,
-      recent_entries: recentEntries,
-      database_info: {
-        total_entries: dbInfo?.total_entries || 0,
-        last_updated: dbInfo?.last_updated,
-        database_type: dbInfo?.database_type || 'PostgreSQL'
-      }
-    });
-  } catch (error) {
-    console.error('Error getting sentiment stats:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to retrieve sentiment statistics: ' + error.message
-    });
-  }
-});
-
-app.get('/api/chart-data', async (req, res) => {
-  try {
-    const chartData = await getChartData();
-    res.json({
-      success: true,
-      chart_data: chartData
-    });
-  } catch (error) {
-    console.error('Error getting chart data:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to retrieve chart data: ' + error.message
-    });
-  }
-});
-
-app.delete('/api/clear-data', async (req, res) => {
-  try {
-    const result = await clearAllData();
-    
-    if (result.success) {
-      res.json({
-        success: true,
-        message: 'All sentiment data cleared successfully'
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: result.error || 'Failed to clear data'
-      });
-    }
+    return {
+      total_entries: parseInt(countResult.rows[0].total),
+      last_updated: updateResult.rows[0].last_updated
+    };
     
   } catch (error) {
-    console.error('Error clearing data:', error);
-    res.status(500).json({
-      success: false,
-      error: 'Failed to clear data: ' + error.message
-    });
+    console.error('❌ Error getting database stats:', error);
+    return {
+      total_entries: 0,
+      last_updated: null
+    };
   }
+}
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  // Closing PostgreSQL connections
+  await pool.end();
+  // PostgreSQL connections closed
+  process.exit(0);
 });
 
-// Proxy endpoints for ML API to avoid CORS issues
-app.post('/api/predict', async (req, res) => {
-  try {
-    const response = await fetch('https://sentiment-4c5g.onrender.com/predict', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(req.body),
-    });
-
-    if (!response.ok) {
-      let errorData;
-      const responseClone = response.clone();
-      try {
-        errorData = await response.json();
-      } catch (parseError) {
-        const textData = await responseClone.text();
-        errorData = { error: textData || 'Unknown error occurred' };
-      }
-      return res.status(response.status).json(errorData);
-    }
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error('ML API predict error:', error);
-    res.status(500).json({
-      error: 'Failed to connect to ML API: ' + error.message
-    });
-  }
-});
-
-app.post('/api/batch_predict', async (req, res) => {
-  try {
-    const response = await fetch('https://sentiment-4c5g.onrender.com/batch_predict', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(req.body),
-    });
-
-    if (!response.ok) {
-      let errorData;
-      const responseClone = response.clone();
-      try {
-        errorData = await response.json();
-      } catch (parseError) {
-        const textData = await responseClone.text();
-        errorData = { error: textData || 'Unknown error occurred' };
-      }
-      return res.status(response.status).json(errorData);
-    }
-
-    const data = await response.json();
-    res.json(data);
-  } catch (error) {
-    console.error('ML API batch_predict error:', error);
-    res.status(500).json({
-      error: 'Failed to connect to ML API: ' + error.message
-    });
-  }
-});
-
-app.use((err, req, res, next) => {
-  console.error('Unhandled error:', err);
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error: ' + err.message
-  });
-});
-
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'Endpoint not found'
-  });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Database API server running on http://localhost:${PORT}`);
-  console.log('📍 Available endpoints:');
-  console.log(`   GET  http://localhost:${PORT}/api/health`);
-  console.log(`   POST http://localhost:${PORT}/api/save-sentiment`);
-  console.log(`   GET  http://localhost:${PORT}/api/sentiment-data`);
-  console.log(`   GET  http://localhost:${PORT}/api/sentiment-stats`);
-  console.log(`   GET  http://localhost:${PORT}/api/chart-data`);
-  console.log(`   DEL  http://localhost:${PORT}/api/clear-data`);
-  console.log(`   POST http://localhost:${PORT}/api/predict`);
-  console.log(`   POST http://localhost:${PORT}/api/batch_predict`);
-  console.log('\n💡 Ready to receive sentiment analysis data!');
-});
-
-export default app;
+export default pool;
