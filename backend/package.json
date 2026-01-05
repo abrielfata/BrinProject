@@ -5,14 +5,15 @@
   "description": "Backend server untuk sentiment analysis dengan PostgreSQL database",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node --trace-warnings server.js",
     "dev": "node --watch server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
     "express": "^4.21.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
