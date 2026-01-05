@@ -23,12 +23,14 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Dynamic CORS configuration
+// FIXED: Dynamic CORS configuration yang lebih permissive
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [
       'https://brin-six.vercel.app',
       'https://brin-project-kp.vercel.app',
-      // Add your actual Vercel deployment URL here
+      // IMPORTANT: Tambahkan pattern untuk semua preview deployments Vercel
+      /https:\/\/brin-.*\.vercel\.app$/,
+      /https:\/\/.*-fates-projects.*\.vercel\.app$/,
       process.env.FRONTEND_URL
     ].filter(Boolean)
   : [
@@ -37,21 +39,41 @@ const allowedOrigins = process.env.NODE_ENV === 'production'
       'http://localhost:5174'
     ];
 
+// FIXED: CORS configuration yang lebih robust
 app.use(cors({
   origin: function(origin, callback) {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
+    // Allow requests with no origin (mobile apps, Postman, curl, etc.)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+    // Check if origin is in allowed origins array
+    const isAllowedString = allowedOrigins.includes(origin);
+    
+    // Check if origin matches any RegExp patterns
+    const isAllowedPattern = allowedOrigins.some(pattern => {
+      if (pattern instanceof RegExp) {
+        return pattern.test(origin);
+      }
+      return false;
+    });
+    
+    // Allow if matches string or pattern, or in development mode
+    if (isAllowedString || isAllowedPattern || process.env.NODE_ENV === 'development') {
       callback(null, true);
     } else {
+      console.log('⚠️ CORS blocked origin:', origin);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  // IMPORTANT: Explicitly handle preflight requests
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
+
+// ADDED: Explicit OPTIONS handling for all routes
+app.options('*', cors());
 
 app.use(express.json());
 
@@ -323,6 +345,10 @@ app.listen(PORT, () => {
   console.log(`   POST /api/predict`);
   console.log(`   POST /api/batch_predict`);
   console.log('\n💡 Ready to receive sentiment analysis data!');
+  
+  // Log allowed origins
+  console.log('\n🔒 CORS Configuration:');
+  console.log('   Allowed Origins:', allowedOrigins);
 });
 
 export default app;
