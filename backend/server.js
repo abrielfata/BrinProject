@@ -25,7 +25,7 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
-    ? ['https://brin-six.vercel.app'] // Your actual Vercel URL
+    ? ['https://brin-six.vercel.app','https://brin-project-kp.vercel.app'] // Your actual Vercel URL
     : ['http://localhost:5173', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
