@@ -7,7 +7,9 @@ let pool = null;
 if (process.env.DATABASE_URL) {
   pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: {
+      rejectUnauthorized: false  // PENTING: Ini yang diperlukan untuk Supabase
+    },
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 30000,
@@ -24,7 +26,7 @@ async function testConnection() {
   
   try {
     const client = await pool.connect();
-    // PostgreSQL connected successfully
+    console.log('✅ PostgreSQL connected successfully');
     client.release();
     return true;
   } catch (error) {
@@ -34,10 +36,10 @@ async function testConnection() {
 }
 
 export async function initializeDatabase() {
-  // Initializing PostgreSQL Database
+  console.log('🔄 Initializing PostgreSQL Database...');
   
   if (!pool) {
-    // PostgreSQL not configured - using fallback mode
+    console.log('⚠️ PostgreSQL not configured - using fallback mode');
     return {
       total_entries: 0,
       last_updated: null,
@@ -47,7 +49,7 @@ export async function initializeDatabase() {
   
   const isConnected = await testConnection();
   if (!isConnected) {
-    // PostgreSQL connection failed - using fallback mode
+    console.log('⚠️ PostgreSQL connection failed - using fallback mode');
     return {
       total_entries: 0,
       last_updated: null,
@@ -58,12 +60,12 @@ export async function initializeDatabase() {
   try {
     // Get database stats
     const stats = await getDatabaseStats();
-    // Database initialized successfully
+    console.log('✅ Database initialized successfully');
     
     return stats;
   } catch (error) {
     console.error('❌ Error initializing database:', error);
-    // Using fallback mode
+    console.log('⚠️ Using fallback mode');
     return {
       total_entries: 0,
       last_updated: null,
@@ -99,13 +101,12 @@ export async function insertSentimentAnalysis(analysisData) {
     const result = await pool.query(query, values);
     const newEntry = result.rows[0];
     
-    // Data inserted successfully
+    console.log('✅ Data inserted successfully:', newEntry.id);
     return { 
       success: true, 
       id: newEntry.id, 
       data: {
         ...newEntry,
-        // Convert back to original format for consistency
         all_probabilities: {
           positive: newEntry.positive_prob,
           negative: newEntry.negative_prob,
@@ -136,7 +137,6 @@ export async function getAllSentimentData() {
     
     const result = await pool.query(query);
     
-    // Transform data to match original JSON format
     return result.rows.map(row => ({
       ...row,
       all_probabilities: {
@@ -278,7 +278,7 @@ export async function clearAllData() {
     const query = 'DELETE FROM sentiment_analysis';
     await pool.query(query);
     
-    // All sentiment data cleared successfully
+    console.log('✅ All sentiment data cleared successfully');
     return { success: true, message: 'All data cleared successfully' };
     
   } catch (error) {
@@ -323,9 +323,9 @@ async function getDatabaseStats() {
 
 // Graceful shutdown
 process.on('SIGINT', async () => {
-  // Closing PostgreSQL connections
+  console.log('🔄 Closing PostgreSQL connections...');
   await pool.end();
-  // PostgreSQL connections closed
+  console.log('✅ PostgreSQL connections closed');
   process.exit(0);
 });
 
