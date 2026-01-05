@@ -329,29 +329,4 @@ process.on('SIGINT', async () => {
   process.exit(0);
 });
 
-export async function insertSentimentAnalysis(analysisData) {
-  console.log('🔍 Starting insertSentimentAnalysis with:', analysisData);
-  
-  if (!pool) {
-    console.error('❌ Pool is null - DATABASE_URL not configured');
-    return { success: false, error: 'PostgreSQL not configured' };
-  }
-  
-  try {
-    console.log('📝 Preparing query...');
-    const query = `...`;
-    const values = [...];
-    
-    console.log('🚀 Executing query...');
-    const result = await pool.query(query, values);
-    
-    console.log('✅ Query successful, rows:', result.rows);
-    // ...
-  } catch (error) {
-    console.error('❌ Database error:', error);
-    console.error('Stack trace:', error.stack);
-    return { success: false, error: error.message };
-  }
-}
-
 export default pool;
