@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: brin-sentiment-backend
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        sync: false
+    healthCheckPath: /api/health
