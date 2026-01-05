@@ -23,14 +23,36 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Dynamic CORS configuration
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [
+      'https://brin-six.vercel.app',
+      'https://brin-project-kp.vercel.app',
+      // Add your actual Vercel deployment URL here
+      process.env.FRONTEND_URL
+    ].filter(Boolean)
+  : [
+      'http://localhost:5173', 
+      'http://localhost:3000',
+      'http://localhost:5174'
+    ];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://brin-six.vercel.app','https://brin-project-kp.vercel.app'] // Your actual Vercel URL
-    : ['http://localhost:5173', 'http://localhost:3000'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 
 // Initialize PostgreSQL database
@@ -49,6 +71,7 @@ app.get('/api/health', async (req, res) => {
     res.json({
       status: 'OK',
       message: 'Database API is running',
+      environment: process.env.NODE_ENV || 'development',
       database: {
         total_entries: dbInfo?.total_entries || 0,
         database_type: dbInfo?.database_type || 'PostgreSQL',
@@ -92,7 +115,6 @@ app.post('/api/save-sentiment', async (req, res) => {
         getSentimentStats(),
         getChartData()
       ]);
-      
       
       res.json({
         success: true,
@@ -188,7 +210,6 @@ app.delete('/api/clear-data', async (req, res) => {
     const result = await clearAllData();
     
     if (result.success) {
-      
       res.json({
         success: true,
         message: 'All sentiment data cleared successfully'
@@ -226,7 +247,6 @@ app.post('/api/predict', async (req, res) => {
       try {
         errorData = await response.json();
       } catch (parseError) {
-        // Handle non-JSON responses (like "Too Many Requests" plain text)
         const textData = await responseClone.text();
         errorData = { error: textData || 'Unknown error occurred' };
       }
@@ -259,7 +279,6 @@ app.post('/api/batch_predict', async (req, res) => {
       try {
         errorData = await response.json();
       } catch (parseError) {
-        // Handle non-JSON responses (like "Too Many Requests" plain text)
         const textData = await responseClone.text();
         errorData = { error: textData || 'Unknown error occurred' };
       }
@@ -292,16 +311,17 @@ app.use('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Database API server running on http://localhost:${PORT}`);
+  console.log(`🚀 Database API server running on port ${PORT}`);
+  console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log('📍 Available endpoints:');
-  console.log(`   GET  http://localhost:${PORT}/api/health`);
-  console.log(`   POST http://localhost:${PORT}/api/save-sentiment`);
-  console.log(`   GET  http://localhost:${PORT}/api/sentiment-data`);
-  console.log(`   GET  http://localhost:${PORT}/api/sentiment-stats`);
-  console.log(`   GET  http://localhost:${PORT}/api/chart-data`);
-  console.log(`   DEL  http://localhost:${PORT}/api/clear-data`);
-  console.log(`   POST http://localhost:${PORT}/api/predict`);
-  console.log(`   POST http://localhost:${PORT}/api/batch_predict`);
+  console.log(`   GET  /api/health`);
+  console.log(`   POST /api/save-sentiment`);
+  console.log(`   GET  /api/sentiment-data`);
+  console.log(`   GET  /api/sentiment-stats`);
+  console.log(`   GET  /api/chart-data`);
+  console.log(`   DEL  /api/clear-data`);
+  console.log(`   POST /api/predict`);
+  console.log(`   POST /api/batch_predict`);
   console.log('\n💡 Ready to receive sentiment analysis data!');
 });
 
